@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import PixelSticker from './PixelSticker'
+import { useWindowWidth } from '../hooks/useWindowWidth'
 import tinkerer from '../assets/tinkerer_big.png'
 
 const FACTS = [
@@ -13,6 +14,7 @@ const FACTS = [
 
 export default function FunFact() {
   const [fact, setFact] = useState(FACTS[0])
+  const isMobile = useWindowWidth() < 640
 
   const shuffle = () => {
     let next = fact
@@ -26,13 +28,13 @@ export default function FunFact() {
 
   return (
     <div style={{ background: '#ffd23f' }}>
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '64px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 36, flexWrap: 'wrap', position: 'relative' }}>
-        <PixelSticker src={tinkerer} size={92} rotate="-7deg" floatDur="6.5s" delay="0.3s" style={{ bottom: -6, right: 150 }} />
+      <div className="funfact-inner">
+        <PixelSticker src={tinkerer} size={92} rotate="-7deg" floatDur="6.5s" delay="0.3s" style={{ bottom: -6, right: 150 }} hidden={isMobile} />
         <div style={{ maxWidth: 720, flex: 1, minWidth: 300 }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, letterSpacing: '.18em', color: '#7a5c00', marginBottom: 16 }}>FUN FACT</div>
-          <p style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 700, fontSize: 30, lineHeight: 1.18, letterSpacing: '-0.01em' }}>{fact}</p>
+          <p className="funfact-text">{fact}</p>
         </div>
-        <button className="shuffle-btn" onClick={shuffle}>shuffle ↻</button>
+        <button className="shuffle-btn" onClick={shuffle}>{isMobile ? '↻' : 'shuffle ↻'}</button>
       </div>
     </div>
   )

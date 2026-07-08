@@ -1,17 +1,20 @@
 import PixelSticker from './PixelSticker'
+import { useWindowWidth } from '../hooks/useWindowWidth'
 import spacema from '../assets/spacema_big.png'
 
 export default function Contact() {
+  const isMobile = useWindowWidth() < 640
+
   return (
     <footer id="contact" style={{ background: '#141414', color: '#fff' }}>
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '88px 32px 72px', position: 'relative' }}>
-        <PixelSticker src={spacema} size={84} rotate="8deg" floatDur="7s" delay="0.9s" style={{ top: 64, right: 8 }} />
+      <div className="contact-inner">
+        <PixelSticker src={spacema} size={84} rotate="8deg" floatDur="7s" delay="0.9s" style={{ top: 64, right: 8 }} hidden={isMobile} />
 
-        <h2 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 800, fontSize: 52, lineHeight: 1.04, letterSpacing: '-0.035em', maxWidth: 680 }}>
+        <h2 className="contact-heading">
           Read something, or just say hello.
         </h2>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginTop: 32, flexWrap: 'wrap' }}>
+        <div className="contact-actions">
           <a href="https://medium.com/@shresprbn" target="_blank" rel="noreferrer" className="btn-pill pink" style={{ fontSize: 15, padding: '15px 28px' }}>
             read me on Medium
           </a>

@@ -56,7 +56,7 @@ export default function WritingGrid() {
            style={{ textDecoration: 'none', fontFamily: "'Space Mono', monospace", fontSize: 13, color: '#8a8a8a', transition: 'color .15s ease' }}
            className="nav-link">all on medium →</a>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div className="writing-grid">
         {essays.map((e) => (
           <a
             key={e.href}
@@ -67,7 +67,7 @@ export default function WritingGrid() {
             style={{ background: e.bg, color: e.textColor, border: e.border }}
           >
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: '.1em', color: e.labelColor }}>{e.label}</div>
-            <div style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 700, fontSize: 24, lineHeight: 1.14, marginTop: 13, color: e.textColor }}>{e.title}</div>
+            <div className="essay-title" style={{ color: e.textColor }}>{e.title}</div>
             <div style={{ fontSize: 14, lineHeight: 1.5, color: e.quoteColor, marginTop: 11 }}>{e.quote}</div>
           </a>
         ))}

@@ -116,3 +116,82 @@ a { color: inherit; }
 .footer-link.yellow:hover { color: #ffd23f; }
 .footer-link.teal:hover   { color: #4ecdc4; }
 .footer-link.pink:hover   { color: #ff6b9d; }
+
+/* ── Layout container ───────────────────────────────────── */
+.container { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+
+/* ── Nav ─────────────────────────────────────────────────── */
+.nav-inner { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; }
+.nav-logo { text-decoration: none; color: #141414; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.03em; }
+.nav-links { display: flex; gap: 30px; font-size: 14px; font-weight: 500; }
+
+/* ── Letter intro ────────────────────────────────────────── */
+.letter-wrap { padding: 80px 0 72px; position: relative; }
+.letter-card { max-width: 640px; background: #faf8f3; border: 1px solid #e8e3d8; padding: 52px 56px 48px; }
+.letter-body { font-family: 'Space Mono', monospace; font-size: 14px; line-height: 2; color: #2e2a24; }
+
+/* ── Writing grid ────────────────────────────────────────── */
+.writing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.essay-title { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; line-height: 1.14; margin-top: 13px; }
+
+/* ── About ───────────────────────────────────────────────── */
+.about-inner { max-width: 1120px; margin: 0 auto; padding: 80px 32px; position: relative; }
+.about-card { background: #fff; color: #3c382f; padding: 36px 40px; box-shadow: 0 6px 24px rgba(0,0,0,.13); transform: rotate(-0.7deg); max-width: 860px; }
+.about-text { margin: 0; font-size: 20px; line-height: 1.65; }
+
+/* ── Fun fact ────────────────────────────────────────────── */
+.funfact-inner { max-width: 1120px; margin: 0 auto; padding: 64px 32px; display: flex; align-items: center; justify-content: space-between; gap: 36px; flex-wrap: wrap; position: relative; }
+.funfact-text { margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.18; letter-spacing: -0.01em; }
+
+/* ── Languages ───────────────────────────────────────────── */
+.languages-wrap { padding: 80px 0; }
+.lang-pill { border-radius: 40px; padding: 11px 22px; font-weight: 600; font-size: 15px; }
+
+/* ── Inventory ───────────────────────────────────────────── */
+.inventory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; }
+.inventory-img { border-radius: 8px; }
+.inventory-label { font-family: 'Space Mono', monospace; font-size: 12px; color: #8a8a8a; margin-top: 11px; }
+
+/* ── Contact ─────────────────────────────────────────────── */
+.contact-inner { max-width: 1120px; margin: 0 auto; padding: 88px 32px 72px; position: relative; }
+.contact-heading { margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 52px; line-height: 1.04; letter-spacing: -0.035em; max-width: 680px; }
+.contact-actions { display: flex; align-items: center; gap: 18px; margin-top: 32px; flex-wrap: wrap; }
+
+/* ── Responsive overrides ────────────────────────────────── */
+@media (max-width: 900px) {
+  .writing-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .container { padding: 0 20px; width: 100%; }
+
+  .nav-inner { padding: 12px 20px; }
+  .nav-logo { font-size: 18px; }
+  .nav-links { gap: 18px; font-size: 13px; }
+
+  .letter-wrap { padding: 32px 20px 24px; }
+  .letter-card { padding: 28px 24px; width: 100%; }
+  .letter-body { font-size: 12px; }
+
+  .essay-card { padding: 20px; }
+  .essay-title { font-size: 17px; }
+
+  .about-inner { padding: 36px 20px; }
+  .about-card { padding: 24px; }
+  .about-text { font-size: 14px; }
+
+  .funfact-inner { padding: 28px 20px; }
+  .funfact-text { font-size: 18px; }
+  .shuffle-btn { padding: 10px 14px; }
+
+  .languages-wrap { padding: 28px 0; }
+  .lang-pill { font-size: 14px; padding: 9px 18px; }
+
+  .inventory-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .inventory-img { border-radius: 6px; }
+  .inventory-label { font-size: 9px; margin-top: 6px; }
+
+  .contact-inner { padding: 48px 20px 40px; }
+  .contact-heading { font-size: 28px; }
+  .contact-actions { flex-direction: column; align-items: flex-start; }
+}

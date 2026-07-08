@@ -1,14 +1,23 @@
 import PixelSticker from './PixelSticker'
+import { useWindowWidth } from '../hooks/useWindowWidth'
 import dragooon  from '../assets/dragooon.png'
 import postcard  from '../assets/postcard.png'
 
 export default function LetterIntro() {
-  return (
-    <div style={{ padding: '80px 0 72px', position: 'relative' }}>
-      <PixelSticker src={dragooon} size={72} rotate="-9deg" floatDur="6s" style={{ top: 60, right: 0 }} />
-      <PixelSticker src={postcard} size={44} rotate="8deg"  floatDur="5s" delay="0.6s" style={{ bottom: 80, right: 60 }} />
+  const isMobile = useWindowWidth() < 640
 
-      <div style={{ maxWidth: 640, background: '#faf8f3', border: '1px solid #e8e3d8', padding: '52px 56px 48px' }}>
+  return (
+    <div className="letter-wrap">
+      <PixelSticker
+        src={dragooon}
+        size={isMobile ? 52 : 72}
+        rotate="-9deg"
+        floatDur="6s"
+        style={isMobile ? { top: 24, right: 14 } : { top: 60, right: 0 }}
+      />
+      <PixelSticker src={postcard} size={44} rotate="8deg" floatDur="5s" delay="0.6s" style={{ bottom: 80, right: 60 }} hidden={isMobile} />
+
+      <div className="letter-card">
         {/* letterhead */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 40 }}>
           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700 }}>
@@ -18,7 +27,7 @@ export default function LetterIntro() {
         </div>
 
         {/* body */}
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, lineHeight: 2, color: '#2e2a24' }}>
+        <div className="letter-body">
           <p style={{ margin: '0 0 22px' }}>Hi,</p>
           <p style={{ margin: '0 0 22px' }}>
             I'm Prabin. I'm a full-stack developer based in Kathmandu — React, Node, the whole

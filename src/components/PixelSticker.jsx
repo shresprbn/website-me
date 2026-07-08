@@ -21,8 +21,9 @@ const rand = (a, b) => a + Math.random() * (b - a)
  *  delay    — float animation delay e.g. "0.6s", default "0s"
  *  floatDur — idle float duration e.g. "6s", default "6s"
  *  style    — extra positioning styles (position, top, right, etc.)
+ *  hidden   — when true, renders nothing
  */
-export default function PixelSticker({ src, alt = '', size = 72, rotate = '0deg', delay = '0s', floatDur = '6s', style = {} }) {
+export default function PixelSticker({ src, alt = '', size = 72, rotate = '0deg', delay = '0s', floatDur = '6s', style = {}, hidden = false }) {
   const ref = useRef(null)
   const timers = useRef([])
 
@@ -53,6 +54,8 @@ export default function PixelSticker({ src, alt = '', size = 72, rotate = '0deg'
     schedule()
     return () => timers.current.forEach(clearTimeout)
   }, [floatDur, delay])
+
+  if (hidden) return null
 
   return (
     <img

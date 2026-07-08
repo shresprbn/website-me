@@ -12,18 +12,18 @@ export default function App() {
     <div style={{ fontFamily: "'Hanken Grotesk', Helvetica, Arial, sans-serif", color: '#141414', background: '#f7f5f0', minHeight: '100vh' }}>
       <Nav />
 
-      <div id="top" style={{ maxWidth: 1120, margin: '0 auto', padding: '0 32px' }}>
+      <div id="top" className="container">
         <LetterIntro />
       </div>
 
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 32px' }}>
+      <div className="container">
         <WritingGrid />
       </div>
 
       <About />
       <FunFact />
 
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 32px' }}>
+      <div className="container">
         <Languages />
         <Inventory />
       </div>
