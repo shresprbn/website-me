@@ -4,6 +4,7 @@ export default function Nav() {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
   const isPlayground = pathname === '/playground'
+  const isPixelMaker = pathname === '/pixel-maker'
 
   const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
 
@@ -27,6 +28,13 @@ export default function Nav() {
             style={isPlayground ? { color: '#ff6b9d' } : undefined}
           >
             playground
+          </Link>
+          <Link
+            to="/pixel-maker"
+            className={`nav-link${isPixelMaker ? ' active' : ''}`}
+            style={isPixelMaker ? { color: '#4ecdc4' } : undefined}
+          >
+            pixel maker
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>
