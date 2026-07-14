@@ -1,4 +1,12 @@
+import { Link, useLocation } from 'react-router-dom'
+
 export default function Nav() {
+  const { pathname } = useLocation()
+  const isHome = pathname === '/'
+  const isPlayground = pathname === '/playground'
+
+  const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
+
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 50,
@@ -7,13 +15,20 @@ export default function Nav() {
       borderBottom: '1px solid #e6e2d9',
     }}>
       <div className="nav-inner">
-        <a href="#top" className="nav-logo">
+        <Link to="/" className="nav-logo">
           prabin<span style={{ color: '#ff6b9d' }}>.</span>
-        </a>
+        </Link>
         <div className="nav-links">
-          <a href="#writing" className="nav-link">writing</a>
-          <a href="#about"   className="nav-link teal">about</a>
-          <a href="#contact" className="nav-link yellow">say hi</a>
+          <a href={sectionHref('#writing')} className="nav-link">writing</a>
+          <a href={sectionHref('#about')} className="nav-link teal">about</a>
+          <Link
+            to="/playground"
+            className={`nav-link${isPlayground ? ' active' : ''}`}
+            style={isPlayground ? { color: '#ff6b9d' } : undefined}
+          >
+            playground
+          </Link>
+          <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>
       </div>
     </nav>
