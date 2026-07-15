@@ -5,6 +5,7 @@ export default function Nav() {
   const isHome = pathname === '/'
   const isPlayground = pathname === '/playground'
   const isPixelMaker = pathname === '/pixel-maker'
+  const isBeatMaker = pathname === '/beat-maker'
 
   const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
 
@@ -35,6 +36,13 @@ export default function Nav() {
             style={isPixelMaker ? { color: '#4ecdc4' } : undefined}
           >
             pixel maker
+          </Link>
+          <Link
+            to="/beat-maker"
+            className={`nav-link${isBeatMaker ? ' active' : ''}`}
+            style={isBeatMaker ? { color: '#ffb800' } : undefined}
+          >
+            beat maker
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>

@@ -688,6 +688,265 @@ a { color: inherit; }
   }
 }
 
+/* ── Beat maker ──────────────────────────────────────────── */
+.beat-maker-page { padding: 64px 32px 100px; }
+.beat-maker-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.beat-maker-transport {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+}
+.beat-maker-bpm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #666;
+}
+.beat-maker-bpm input[type='range'] {
+  width: 120px;
+  accent-color: #ffb800;
+}
+.beat-maker-bpm-val {
+  min-width: 28px;
+  color: #141414;
+  font-weight: 700;
+}
+.beat-maker-bpm-input {
+  width: 56px;
+  border: 1px solid #e0dbd0;
+  border-radius: 8px;
+  background: #faf8f3;
+  padding: 6px 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #141414;
+  text-align: center;
+}
+.beat-maker-bpm-input:focus {
+  outline: 2px solid #ffb800;
+  outline-offset: 1px;
+}
+.beat-maker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.beat-maker-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.beat-maker-pages-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.beat-maker-page-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #888;
+  margin: 0 4px;
+}
+.beat-maker-bar-ops {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.beat-maker-stage {
+  background: #faf8f3;
+  border: 1px solid #e8e3d8;
+  border-radius: 16px;
+  padding: 22px 20px 18px;
+  overflow-x: auto;
+  touch-action: pan-y;
+}
+.beat-maker-section {
+  margin-bottom: 36px;
+}
+.beat-maker-section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: #999;
+  margin-bottom: 12px;
+}
+.beat-maker-melody-stage {
+  max-height: min(560px, 70vh);
+  overflow-y: auto;
+  overflow-x: auto;
+}
+.beat-maker-melody-roll {
+  min-width: 0;
+}
+.beat-maker-melody-row {
+  margin-bottom: 4px;
+}
+.beat-maker-melody-row.sharp .beat-maker-pads .beat-maker-pad:not(.on) {
+  background: #e6e1d6;
+  border-color: #d4cec0;
+}
+.beat-maker-melody-row.sharp .beat-maker-note-label {
+  color: #777;
+}
+.beat-maker-note-label {
+  color: #141414;
+  font-size: 11px;
+}
+.beat-maker-melody-pad {
+  min-height: 22px;
+  border-radius: 5px;
+}
+.beat-maker-octave {
+  margin-bottom: 14px;
+}
+.beat-maker-octave:last-child {
+  margin-bottom: 0;
+}
+.beat-maker-octave-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid #e8e3d8;
+  border-radius: 10px;
+  background: #f3efe6;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #141414;
+  cursor: pointer;
+  text-align: left;
+}
+.beat-maker-octave-toggle:hover {
+  background: #ebe6da;
+}
+.beat-maker-octave-chevron {
+  color: #999;
+  width: 12px;
+}
+.beat-maker-octave-range {
+  margin-left: auto;
+  font-weight: 400;
+  color: #999;
+  letter-spacing: 0.04em;
+}
+.beat-maker-octave-summary {
+  margin-bottom: 4px;
+}
+.beat-maker-summary-pad {
+  position: relative;
+  min-height: 36px;
+  pointer-events: none;
+}
+.beat-maker-summary-pad.on {
+  background: rgba(124, 108, 240, 0.08);
+  border-color: #c8bff5;
+}
+.beat-maker-summary-line {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  border-radius: 1px;
+  transform: translateY(-50%);
+}
+.beat-maker-beat-marks {
+  display: grid;
+  grid-template-columns: 78px repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-right: 4px;
+}
+.beat-maker-beat-mark {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #bbb;
+  text-align: center;
+}
+.beat-maker-row {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.beat-maker-track-label {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+.beat-maker-track-label:hover { opacity: 0.75; }
+.beat-maker-pads {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(28px, 1fr));
+  gap: 6px;
+}
+.beat-maker-pad {
+  aspect-ratio: 1;
+  min-height: 28px;
+  border-radius: 8px;
+  border: 1.5px solid #e0dbd0;
+  background: #f3efe6;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
+}
+.beat-maker-pad.beat {
+  border-color: #cfc8b8;
+  background: #ebe6da;
+}
+.beat-maker-pad.on {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.beat-maker-pad.current {
+  outline: 2px solid #141414;
+  outline-offset: 1px;
+  transform: scale(1.06);
+}
+.beat-maker-pad:hover { transform: translateY(-1px); }
+.beat-maker-pad:active { transform: scale(0.96); }
+
+@media (max-width: 900px) {
+  .beat-maker-page { padding: 20px 0 48px; }
+  .beat-maker-bar-ops { margin-left: 0; }
+  .beat-maker-beat-marks,
+  .beat-maker-row {
+    grid-template-columns: 64px 1fr;
+  }
+  .beat-maker-pads {
+    grid-template-columns: repeat(16, minmax(20px, 1fr));
+    gap: 4px;
+  }
+  .beat-maker-pad {
+    min-height: 20px;
+    border-radius: 5px;
+  }
+  .beat-maker-track-label { font-size: 11px; }
+  .beat-maker-melody-pad { min-height: 18px; }
+  .beat-maker-section { margin-bottom: 24px; }
+}
+
 @media (max-width: 900px) {
   .pixel-maker-page { padding: 20px 0 48px; }
   .pixel-maker-stage-row { flex-direction: column; gap: 12px; }
