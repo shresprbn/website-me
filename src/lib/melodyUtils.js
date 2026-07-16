@@ -68,7 +68,9 @@ export function cloneMelodyPages(pages) {
   return pages.map(cloneMelodyBar)
 }
 
-export function playMelodyNote(ctx, freq, time) {
+export function playMelodyNote(ctx, freq, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
   const filter = ctx.createBiquadFilter()
@@ -82,7 +84,8 @@ export function playMelodyNote(ctx, freq, time) {
   gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.45)
   osc.connect(filter)
   filter.connect(gain)
-  gain.connect(ctx.destination)
+  gain.connect(output)
+  output.connect(ctx.destination)
   osc.start(time)
   osc.stop(time + 0.5)
 
@@ -94,13 +97,13 @@ export function playMelodyNote(ctx, freq, time) {
   pGain.gain.exponentialRampToValueAtTime(0.06, time + 0.008)
   pGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.2)
   partial.connect(pGain)
-  pGain.connect(ctx.destination)
+  pGain.connect(output)
   partial.start(time)
   partial.stop(time + 0.22)
 }
 
-export function playMelodyByIndex(ctx, noteIndex, time) {
+export function playMelodyByIndex(ctx, noteIndex, time, volume = 1) {
   const note = MELODY_NOTES[noteIndex]
   if (!note) return
-  playMelodyNote(ctx, note.freq, time)
+  playMelodyNote(ctx, note.freq, time, volume)
 }

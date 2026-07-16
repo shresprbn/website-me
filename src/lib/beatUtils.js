@@ -68,9 +68,11 @@ function noiseBuffer(ctx, duration) {
   return buffer
 }
 
-export function playKick(ctx, time) {
+export function playKick(ctx, time, volume = 1) {
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
+  const output = ctx.createGain()
+  output.gain.value = volume
   osc.type = 'sine'
   osc.frequency.setValueAtTime(150, time)
   osc.frequency.exponentialRampToValueAtTime(40, time + 0.12)
@@ -78,12 +80,15 @@ export function playKick(ctx, time) {
   gain.gain.exponentialRampToValueAtTime(0.85, time + 0.005)
   gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.28)
   osc.connect(gain)
-  gain.connect(ctx.destination)
+  gain.connect(output)
+  output.connect(ctx.destination)
   osc.start(time)
   osc.stop(time + 0.3)
 }
 
-export function playSnare(ctx, time) {
+export function playSnare(ctx, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const noise = ctx.createBufferSource()
   noise.buffer = noiseBuffer(ctx, 0.2)
   const noiseFilter = ctx.createBiquadFilter()
@@ -95,7 +100,7 @@ export function playSnare(ctx, time) {
   noiseGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.15)
   noise.connect(noiseFilter)
   noiseFilter.connect(noiseGain)
-  noiseGain.connect(ctx.destination)
+  noiseGain.connect(output)
   noise.start(time)
   noise.stop(time + 0.2)
 
@@ -107,12 +112,16 @@ export function playSnare(ctx, time) {
   oscGain.gain.exponentialRampToValueAtTime(0.35, time + 0.004)
   oscGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.1)
   osc.connect(oscGain)
-  oscGain.connect(ctx.destination)
+  oscGain.connect(output)
   osc.start(time)
   osc.stop(time + 0.12)
+
+  output.connect(ctx.destination)
 }
 
-export function playHat(ctx, time) {
+export function playHat(ctx, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const noise = ctx.createBufferSource()
   noise.buffer = noiseBuffer(ctx, 0.08)
   const filter = ctx.createBiquadFilter()
@@ -124,12 +133,15 @@ export function playHat(ctx, time) {
   gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.06)
   noise.connect(filter)
   filter.connect(gain)
-  gain.connect(ctx.destination)
+  gain.connect(output)
+  output.connect(ctx.destination)
   noise.start(time)
   noise.stop(time + 0.08)
 }
 
-export function playClap(ctx, time) {
+export function playClap(ctx, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const bursts = [0, 0.012, 0.024]
   bursts.forEach((offset, i) => {
     const t = time + offset
@@ -146,13 +158,16 @@ export function playClap(ctx, time) {
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05)
     noise.connect(filter)
     filter.connect(gain)
-    gain.connect(ctx.destination)
+    gain.connect(output)
     noise.start(t)
     noise.stop(t + 0.06)
   })
+  output.connect(ctx.destination)
 }
 
-export function playOpenHat(ctx, time) {
+export function playOpenHat(ctx, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const noise = ctx.createBufferSource()
   noise.buffer = noiseBuffer(ctx, 0.35)
   const filter = ctx.createBiquadFilter()
@@ -164,12 +179,15 @@ export function playOpenHat(ctx, time) {
   gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.32)
   noise.connect(filter)
   filter.connect(gain)
-  gain.connect(ctx.destination)
+  gain.connect(output)
+  output.connect(ctx.destination)
   noise.start(time)
   noise.stop(time + 0.35)
 }
 
-export function playTom(ctx, time) {
+export function playTom(ctx, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
   osc.type = 'sine'
@@ -179,12 +197,15 @@ export function playTom(ctx, time) {
   gain.gain.exponentialRampToValueAtTime(0.7, time + 0.006)
   gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.28)
   osc.connect(gain)
-  gain.connect(ctx.destination)
+  gain.connect(output)
+  output.connect(ctx.destination)
   osc.start(time)
   osc.stop(time + 0.3)
 }
 
-export function playRim(ctx, time) {
+export function playRim(ctx, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
   osc.type = 'square'
@@ -194,7 +215,7 @@ export function playRim(ctx, time) {
   gain.gain.exponentialRampToValueAtTime(0.28, time + 0.002)
   gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05)
   osc.connect(gain)
-  gain.connect(ctx.destination)
+  gain.connect(output)
   osc.start(time)
   osc.stop(time + 0.06)
 
@@ -205,12 +226,16 @@ export function playRim(ctx, time) {
   nGain.gain.exponentialRampToValueAtTime(0.15, time + 0.001)
   nGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.03)
   noise.connect(nGain)
-  nGain.connect(ctx.destination)
+  nGain.connect(output)
   noise.start(time)
   noise.stop(time + 0.04)
+
+  output.connect(ctx.destination)
 }
 
-export function playCowbell(ctx, time) {
+export function playCowbell(ctx, time, volume = 1) {
+  const output = ctx.createGain()
+  output.gain.value = volume
   const makePartial = (freq, peak) => {
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
@@ -225,12 +250,13 @@ export function playCowbell(ctx, time) {
     filter.Q.value = 8
     osc.connect(filter)
     filter.connect(gain)
-    gain.connect(ctx.destination)
+    gain.connect(output)
     osc.start(time)
     osc.stop(time + 0.25)
   }
   makePartial(560, 0.22)
   makePartial(845, 0.18)
+  output.connect(ctx.destination)
 }
 
 const HIT_PLAYERS = [
@@ -244,9 +270,9 @@ const HIT_PLAYERS = [
   playCowbell,
 ]
 
-export function playTrackHit(ctx, trackIndex, time) {
+export function playTrackHit(ctx, trackIndex, time, volume = 1) {
   const play = HIT_PLAYERS[trackIndex]
-  if (play) play(ctx, time)
+  if (play) play(ctx, time, volume)
 }
 
 /**
@@ -260,6 +286,8 @@ export function createSequencer({
   getDrumsArmed,
   getMelodyArmed,
   getBpm,
+  getDrumsVolume,
+  getMelodyVolume,
   onStep,
 }) {
   let ctx = null
@@ -291,12 +319,15 @@ export function createSequencer({
     let drumPos = null
     let melodyPos = null
 
+    const drumVolume = getDrumsVolume?.() ?? 1
+    const melodyVolume = getMelodyVolume?.() ?? 1
+
     if (drumPages?.length) {
       drumPos = stepToBarStep(step, drumPages.length)
       if (drumsOn) {
         const bar = drumPages[drumPos.barIndex]
         bar.forEach((track, trackIndex) => {
-          if (track[drumPos.stepIndex]) playTrackHit(ctx, trackIndex, time)
+          if (track[drumPos.stepIndex]) playTrackHit(ctx, trackIndex, time, drumVolume)
         })
       }
     }
@@ -306,7 +337,7 @@ export function createSequencer({
       if (melodyOn) {
         const melodyBar = melodyPages[melodyPos.barIndex]
         melodyBar.forEach((row, noteIndex) => {
-          if (row[melodyPos.stepIndex]) playMelodyByIndex(ctx, noteIndex, time)
+          if (row[melodyPos.stepIndex]) playMelodyByIndex(ctx, noteIndex, time, melodyVolume)
         })
       }
     }

@@ -86,6 +86,9 @@ function SectionTransport({
   onRemoveBar,
   onClearBar,
   onClearAll,
+  volume,
+  onVolumeChange,
+  showBpm = true,
   accent = '#ffb800',
 }) {
   const [bpmDraft, setBpmDraft] = useState(String(bpm))
@@ -118,32 +121,47 @@ function SectionTransport({
           >
             {playing ? 'stop ■' : 'play ▶'}
           </button>
-          <label className="beat-maker-bpm">
-            <span>bpm</span>
+          {showBpm ? (
+            <label className="beat-maker-bpm">
+              <span>bpm</span>
+              <input
+                type="range"
+                min={MIN_BPM}
+                max={MAX_BPM}
+                value={bpm}
+                onChange={(e) => onBpmChange(Number(e.target.value))}
+              />
+              <input
+                type="number"
+                className="beat-maker-bpm-input"
+                min={MIN_BPM}
+                max={MAX_BPM}
+                value={bpmDraft}
+                onChange={(e) => setBpmDraft(e.target.value)}
+                onBlur={commitBpm}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    commitBpm()
+                    e.currentTarget.blur()
+                  }
+                }}
+                aria-label="BPM"
+              />
+            </label>
+          ) : null}
+          <label className="beat-maker-volume">
+            <span>vol</span>
             <input
               type="range"
-              min={MIN_BPM}
-              max={MAX_BPM}
-              value={bpm}
-              onChange={(e) => onBpmChange(Number(e.target.value))}
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={(e) => onVolumeChange(Number(e.target.value))}
+              aria-label="Volume"
             />
-            <input
-              type="number"
-              className="beat-maker-bpm-input"
-              min={MIN_BPM}
-              max={MAX_BPM}
-              value={bpmDraft}
-              onChange={(e) => setBpmDraft(e.target.value)}
-              onBlur={commitBpm}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  commitBpm()
-                  e.currentTarget.blur()
-                }
-              }}
-              aria-label="BPM"
-            />
+            <span className="beat-maker-volume-val">{Math.round(volume * 100)}%</span>
           </label>
         </div>
 
@@ -242,6 +260,8 @@ function useSectionSwipe(viewBar, setViewBar, pageCount) {
 export default function BeatMaker() {
   // ── Shared transport clock; each part can mute independently ──
   const [bpm, setBpm] = useState(DEFAULT_BPM)
+  const [drumsVolume, setDrumsVolume] = useState(0.9)
+  const [melodyVolume, setMelodyVolume] = useState(0.85)
   const [drumsArmed, setDrumsArmed] = useState(false)
   const [melodyArmed, setMelodyArmed] = useState(false)
 
@@ -270,12 +290,16 @@ export default function BeatMaker() {
   const melodyViewBarRef = useRef(melodyViewBar)
   const melodyArmedRef = useRef(melodyArmed)
   const bpmRef = useRef(bpm)
+  const drumsVolumeRef = useRef(drumsVolume)
+  const melodyVolumeRef = useRef(melodyVolume)
   const seqRef = useRef(null)
 
   melodyPagesRef.current = melodyPages
   melodyViewBarRef.current = melodyViewBar
   melodyArmedRef.current = melodyArmed
   bpmRef.current = bpm
+  drumsVolumeRef.current = drumsVolume
+  melodyVolumeRef.current = melodyVolume
 
   useEffect(() => {
     const seq = createSequencer({
@@ -284,6 +308,8 @@ export default function BeatMaker() {
       getDrumsArmed: () => drumsArmedRef.current,
       getMelodyArmed: () => melodyArmedRef.current,
       getBpm: () => bpmRef.current,
+      getDrumsVolume: () => drumsVolumeRef.current,
+      getMelodyVolume: () => melodyVolumeRef.current,
       onStep: ({ drum, melody }) => {
         if (drum) {
           setDrumHead(drum)
@@ -381,7 +407,7 @@ export default function BeatMaker() {
     if (!seq) return
     const ctx = await seq.unlock()
     if (!ctx) return
-    playTrackHit(ctx, trackIndex, ctx.currentTime)
+    playTrackHit(ctx, trackIndex, ctx.currentTime, drumsVolumeRef.current)
   }
 
   const previewMelody = async (noteIndex) => {
@@ -389,7 +415,7 @@ export default function BeatMaker() {
     if (!seq) return
     const ctx = await seq.unlock()
     if (!ctx) return
-    playMelodyByIndex(ctx, noteIndex, ctx.currentTime)
+    playMelodyByIndex(ctx, noteIndex, ctx.currentTime, melodyVolumeRef.current)
   }
 
   const addDrumBar = () => {
@@ -500,6 +526,8 @@ export default function BeatMaker() {
             onTogglePlay={() => toggleSection('drums')}
             bpm={bpm}
             onBpmChange={setBpm}
+            volume={drumsVolume}
+            onVolumeChange={setDrumsVolume}
             pages={drumPages}
             viewBar={drumViewBar}
             onViewBar={setDrumViewBar}
@@ -507,6 +535,7 @@ export default function BeatMaker() {
             onRemoveBar={removeDrumBar}
             onClearBar={clearDrumBar}
             onClearAll={clearAllDrums}
+            showBpm
             accent="#ff6b9d"
           />
           <div className="beat-maker-stage" {...drumSwipe}>
@@ -553,9 +582,6 @@ export default function BeatMaker() {
                 </div>
               </div>
             ))}
-            <div className="playground-stage-caption">
-              8 drum tracks · stop independently · stays in sync when both play
-            </div>
           </div>
         </section>
 
@@ -566,6 +592,8 @@ export default function BeatMaker() {
             onTogglePlay={() => toggleSection('melody')}
             bpm={bpm}
             onBpmChange={setBpm}
+            volume={melodyVolume}
+            onVolumeChange={setMelodyVolume}
             pages={melodyPages}
             viewBar={melodyViewBar}
             onViewBar={setMelodyViewBar}
@@ -573,6 +601,7 @@ export default function BeatMaker() {
             onRemoveBar={removeMelodyBar}
             onClearBar={clearMelodyBar}
             onClearAll={clearAllMelody}
+            showBpm={false}
             accent={MELODY_COLOR}
           />
           <div className="beat-maker-stage beat-maker-melody-stage" {...melodySwipe}>
@@ -699,9 +728,6 @@ export default function BeatMaker() {
               })}
             </div>
 
-            <div className="playground-stage-caption">
-              C2–B5 · stop independently · rejoins in sync
-            </div>
           </div>
         </section>
       </div>

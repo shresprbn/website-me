@@ -6,6 +6,8 @@ export default function Nav() {
   const isPlayground = pathname === '/playground'
   const isPixelMaker = pathname === '/pixel-maker'
   const isBeatMaker = pathname === '/beat-maker'
+  const isReferencePuller = pathname === '/reference-puller'
+  const isCharacterMaker = pathname === '/character-maker'
 
   const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
 
@@ -43,6 +45,20 @@ export default function Nav() {
             style={isBeatMaker ? { color: '#ffb800' } : undefined}
           >
             beat maker
+          </Link>
+          <Link
+            to="/reference-puller"
+            className={`nav-link${isReferencePuller ? ' active' : ''}`}
+            style={isReferencePuller ? { color: '#7c6cf0' } : undefined}
+          >
+            reference puller
+          </Link>
+          <Link
+            to="/character-maker"
+            className={`nav-link${isCharacterMaker ? ' active' : ''}`}
+            style={isCharacterMaker ? { color: '#57b894' } : undefined}
+          >
+            character
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>
