@@ -58,7 +58,7 @@ export default function Nav() {
             className={`nav-link${isCharacterMaker ? ' active' : ''}`}
             style={isCharacterMaker ? { color: '#57b894' } : undefined}
           >
-            character
+            character maker
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>

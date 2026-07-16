@@ -5,10 +5,12 @@ import PixelMaker from './pages/PixelMaker'
 import BeatMaker from './pages/BeatMaker'
 import ReferencePuller from './pages/ReferencePuller'
 import CharacterMaker from './pages/CharacterMaker'
+import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/playground" element={<Playground />} />
