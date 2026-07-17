@@ -8,6 +8,8 @@ export default function Nav() {
   const isBeatMaker = pathname === '/beat-maker'
   const isReferencePuller = pathname === '/reference-puller'
   const isCharacterMaker = pathname === '/character-maker'
+  const isFaceStudy = pathname === '/face-study'
+  const isFortuneTeller = pathname === '/fortune-teller'
 
   const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
 
@@ -59,6 +61,20 @@ export default function Nav() {
             style={isCharacterMaker ? { color: '#57b894' } : undefined}
           >
             character maker
+          </Link>
+          <Link
+            to="/face-study"
+            className={`nav-link${isFaceStudy ? ' active' : ''}`}
+            style={isFaceStudy ? { color: '#e07a5f' } : undefined}
+          >
+            face study
+          </Link>
+          <Link
+            to="/fortune-teller"
+            className={`nav-link${isFortuneTeller ? ' active' : ''}`}
+            style={isFortuneTeller ? { color: '#9d4edd' } : undefined}
+          >
+            fortune teller
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>

@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
+import StudyTimer, { TIMER_PRESETS } from '../components/StudyTimer'
 import {
   ACCENT,
   SOURCES,
-  TIMER_PRESETS,
   createShuffleBag,
   drawArtwork,
   drawGallery,
-  formatClock,
   loadPool,
   preloadImage,
   sourceLabel,
@@ -301,28 +300,16 @@ export default function ReferencePuller() {
             <div className="reference-meta">
               {mode === 'timer' && (
                 <div className="reference-timer">
-                  <div className="reference-clock" style={{ color: ACCENT }}>
-                    {formatClock(remaining)}
-                  </div>
-                  <div className="reference-chips">
-                    {TIMER_PRESETS.map((p) => (
-                      <button
-                        key={p.seconds}
-                        style={seconds === p.seconds ? activePresetBtn : presetBtn}
-                        onClick={() => chooseSeconds(p.seconds)}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="reference-chips">
-                    <button style={outlineBtn} onClick={() => setRunning((r) => !r)}>
-                      {running ? 'Pause' : 'Start'}
-                    </button>
-                    <button style={outlineBtn} onClick={pull} disabled={pulling}>
-                      Skip
-                    </button>
-                  </div>
+                  <StudyTimer
+                    remaining={remaining}
+                    seconds={seconds}
+                    running={running}
+                    accent={ACCENT}
+                    onChoose={chooseSeconds}
+                    onToggle={() => setRunning((r) => !r)}
+                    onSkip={pull}
+                    skipDisabled={pulling}
+                  />
                 </div>
               )}
 

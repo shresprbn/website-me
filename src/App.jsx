@@ -5,6 +5,8 @@ import PixelMaker from './pages/PixelMaker'
 import BeatMaker from './pages/BeatMaker'
 import ReferencePuller from './pages/ReferencePuller'
 import CharacterMaker from './pages/CharacterMaker'
+import FaceStudy from './pages/FaceStudy'
+import FortuneTeller from './pages/FortuneTeller'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -18,6 +20,8 @@ export default function App() {
         <Route path="/beat-maker" element={<BeatMaker />} />
         <Route path="/reference-puller" element={<ReferencePuller />} />
         <Route path="/character-maker" element={<CharacterMaker />} />
+        <Route path="/face-study" element={<FaceStudy />} />
+        <Route path="/fortune-teller" element={<FortuneTeller />} />
       </Routes>
     </BrowserRouter>
   )

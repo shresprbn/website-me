@@ -1367,3 +1367,261 @@ a { color: inherit; }
   .character-maker-toolbar button { padding: 9px 16px !important; font-size: 12px !important; }
   .character-maker-svg { max-width: 260px; }
 }
+
+/* ── Face Study ──────────────────────────────────────────── */
+.face-study-page { padding: 64px 32px 100px; }
+.face-study-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.face-study-modes { display: flex; gap: 8px; }
+.face-study-views { display: flex; gap: 8px; }
+
+.face-study-timerbar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 22px;
+  background: #faf8f3;
+  border: 1px solid #e8e3d8;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.face-study-progress {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: #8a8a8a;
+}
+.face-study-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #a08d84;
+  margin: 0 0 20px;
+}
+
+.face-study-card {
+  background: #faf8f3;
+  border: 1px solid #e8e3d8;
+  border-radius: 12px;
+  padding: 26px 44px 40px;
+}
+.face-study-cardtop {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 20px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid #efe9dd;
+}
+.face-study-prose {
+  margin: 0;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 27px;
+  line-height: 1.62;
+  letter-spacing: -0.015em;
+  color: #141414;
+  max-width: 720px;
+}
+.face-study-person { font-weight: 700; }
+.face-study-just {
+  color: #e07a5f;
+  border-bottom: 2px solid rgba(224, 122, 95, .35);
+}
+.face-study-waiting {
+  margin: 22px 0 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #a08d84;
+}
+
+/* table view — lives inside the card, so no nested card chrome */
+.face-study-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px 48px;
+  align-items: start;
+}
+.face-study-group-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #e07a5f;
+  margin-bottom: 14px;
+}
+.face-study-trait {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 11px 0;
+  border-top: 1px solid #efe9dd;
+}
+.face-study-trait:first-of-type { border-top: none; }
+.face-study-trait-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: .05em;
+  color: #8a8a8a;
+  flex-shrink: 0;
+}
+.face-study-trait-value {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 16px;
+  color: #141414;
+  text-align: right;
+}
+.face-study-trait.pending .face-study-trait-value { color: #cabfae; }
+
+/* ── Study timer (shared component) ──────────────────────── */
+.study-timer { display: flex; flex-direction: column; gap: 12px; }
+.study-timer-clock {
+  font-family: 'Space Mono', monospace;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.study-timer-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.study-timer-input {
+  width: 74px;
+  padding: 9px 12px;
+  border: 1px solid #e0dbd0;
+  border-radius: 40px;
+  background: #fff;
+  color: #141414;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.study-timer-input:focus { outline: none; border-width: 2px; }
+
+@media (max-width: 760px) {
+  .face-study-page { padding: 20px 0 48px; }
+  .face-study-toolbar { margin-bottom: 14px; }
+  .face-study-card { padding: 20px 22px 26px; }
+  .face-study-prose { font-size: 21px; line-height: 1.55; }
+  .face-study-table { grid-template-columns: 1fr; gap: 20px; }
+  .study-timer-clock { font-size: 36px; }
+}
+
+@media (max-width: 640px) {
+  .face-study-trait { flex-direction: column; gap: 3px; }
+  .face-study-trait-value { text-align: left; }
+}
+
+/* ── Fortune teller ──────────────────────────────────────── */
+.fortune-teller-page { padding: 64px 32px 100px; }
+
+.fortune-teller-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 28px;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.fortune-teller-img {
+  width: 220px;
+  max-width: 60%;
+  height: auto;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+/* gentle sway while the oracle "consults the beyond" */
+.fortune-teller-stage.is-loading .fortune-teller-img {
+  animation: fortune-sway 2.2s ease-in-out infinite;
+}
+@keyframes fortune-sway {
+  0%   { transform: rotate(-3deg) scale(1); }
+  25%  { transform: rotate(2deg) scale(1.03); }
+  50%  { transform: rotate(-2deg) scale(1.05); }
+  75%  { transform: rotate(3deg) scale(1.03); }
+  100% { transform: rotate(-3deg) scale(1); }
+}
+
+.fortune-ask {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  width: 100%;
+}
+.fortune-input {
+  flex: 1 1 280px;
+  min-width: 0;
+  background: #faf8f3;
+  border: 1px solid #e8e3d8;
+  border-radius: 40px;
+  padding: 13px 22px;
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  color: #141414;
+}
+.fortune-input::placeholder { color: #a99; opacity: 0.7; }
+.fortune-input:focus {
+  outline: none;
+  border-color: #9d4edd;
+  border-width: 2px;
+  padding: 12px 21px;
+}
+
+.fortune-loading {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fortune-consulting {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  animation: fortune-blink 1.4s ease-in-out infinite;
+}
+@keyframes fortune-blink {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+.fortune-card {
+  background: #faf8f3;
+  border: 1px solid #e8e3d8;
+  border-radius: 12px;
+  padding: 30px 40px 34px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.fortune-question {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #a08d84;
+}
+.fortune-question span { color: #6b5b54; }
+.fortune-line {
+  margin: 0;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 27px;
+  line-height: 1.5;
+  letter-spacing: -0.015em;
+  color: #141414;
+  max-width: 520px;
+}
+
+@media (max-width: 760px) {
+  .fortune-teller-page { padding: 20px 0 48px; }
+  .fortune-card { padding: 22px 22px 28px; }
+  .fortune-line { font-size: 21px; }
+  .fortune-teller-img { width: 160px; }
+}
