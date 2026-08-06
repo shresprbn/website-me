@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import Playground from './pages/Playground'
 import PixelMaker from './pages/PixelMaker'
 import Gallery from './pages/Gallery'
+import CreationDetail from './pages/CreationDetail'
 import BeatMaker from './pages/BeatMaker'
 import ReferencePuller from './pages/ReferencePuller'
 import CharacterMaker from './pages/CharacterMaker'
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/playground" element={<Playground />} />
         <Route path="/pixel-maker" element={<PixelMaker />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/gallery/:id" element={<CreationDetail />} />
         <Route path="/beat-maker" element={<BeatMaker />} />
         <Route path="/reference-puller" element={<ReferencePuller />} />
         <Route path="/character-maker" element={<CharacterMaker />} />

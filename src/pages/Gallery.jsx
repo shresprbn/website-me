@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
 import { fetchCreations, GALLERY_ENABLED } from '../lib/gallery'
 
@@ -79,7 +80,7 @@ export default function Gallery() {
         {status === 'ready' && creations.length > 0 && (
           <div className="gallery-grid">
             {creations.map((c) => (
-              <div key={c.id} className="gallery-card">
+              <Link key={c.id} to={`/gallery/${c.id}`} className="gallery-card">
                 <div className="gallery-card-thumb">
                   {c.thumbnail_url ? (
                     <img src={c.thumbnail_url} alt={c.title || c.kind} loading="lazy" />
@@ -91,7 +92,7 @@ export default function Gallery() {
                   <span className="gallery-card-kind">{c.kind}</span>
                   <span className="gallery-card-date">{formatDate(c.created_at)}</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
