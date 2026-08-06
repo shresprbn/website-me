@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Playground from './pages/Playground'
+import BounceLab from './pages/BounceLab'
 import PixelMaker from './pages/PixelMaker'
 import Gallery from './pages/Gallery'
 import CreationDetail from './pages/CreationDetail'
@@ -18,6 +19,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/playground" element={<Playground />} />
+        <Route path="/bounce-lab" element={<BounceLab />} />
         <Route path="/pixel-maker" element={<PixelMaker />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/gallery/:id" element={<CreationDetail />} />

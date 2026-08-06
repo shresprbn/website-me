@@ -737,6 +737,31 @@ a { color: inherit; }
 .comment-textarea { resize: vertical; }
 .comment-form-error { font-family: 'Space Mono', monospace; font-size: 12px; color: #e07a5f; margin: 0; }
 
+/* ── Playground hub ──────────────────────────────────────── */
+.playground-hub-page { padding: 64px 32px 100px; }
+.playground-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px;
+}
+.playground-hub-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e8e3d8;
+  border-radius: 10px;
+  padding: 26px 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.playground-hub-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
+.playground-hub-glyph { font-size: 26px; line-height: 1; }
+.playground-hub-title { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 18px; }
+.playground-hub-blurb { font-size: 13px; color: #8a8a8a; line-height: 1.4; }
+
 /* ── Pixel maker ─────────────────────────────────────────── */
 .pixel-maker-page { padding: 64px 32px 100px; }
 .pixel-maker-toolbar {

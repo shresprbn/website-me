@@ -1,16 +1,23 @@
 import { Link, useLocation } from 'react-router-dom'
 
+const PLAYGROUND_ROUTES = [
+  '/playground',
+  '/bounce-lab',
+  '/pixel-maker',
+  '/beat-maker',
+  '/character-maker',
+  '/reference-puller',
+  '/face-study',
+  '/fortune-teller',
+]
+
 export default function Nav() {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
-  const isPlayground = pathname === '/playground'
-  const isPixelMaker = pathname === '/pixel-maker'
-  const isGallery = pathname === '/gallery'
-  const isBeatMaker = pathname === '/beat-maker'
-  const isReferencePuller = pathname === '/reference-puller'
-  const isCharacterMaker = pathname === '/character-maker'
-  const isFaceStudy = pathname === '/face-study'
-  const isFortuneTeller = pathname === '/fortune-teller'
+  const isGallery = pathname === '/gallery' || pathname.startsWith('/gallery/')
+  const isPlaygroundSection =
+    !isGallery &&
+    PLAYGROUND_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))
 
   const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
 
@@ -30,17 +37,10 @@ export default function Nav() {
           <a href={sectionHref('#about')} className="nav-link teal">about</a>
           <Link
             to="/playground"
-            className={`nav-link${isPlayground ? ' active' : ''}`}
-            style={isPlayground ? { color: '#ff6b9d' } : undefined}
+            className={`nav-link${isPlaygroundSection ? ' active' : ''}`}
+            style={isPlaygroundSection ? { color: '#ff6b9d' } : undefined}
           >
             playground
-          </Link>
-          <Link
-            to="/pixel-maker"
-            className={`nav-link${isPixelMaker ? ' active' : ''}`}
-            style={isPixelMaker ? { color: '#4ecdc4' } : undefined}
-          >
-            pixel maker
           </Link>
           <Link
             to="/gallery"
@@ -48,41 +48,6 @@ export default function Nav() {
             style={isGallery ? { color: '#ff6b9d' } : undefined}
           >
             gallery
-          </Link>
-          <Link
-            to="/beat-maker"
-            className={`nav-link${isBeatMaker ? ' active' : ''}`}
-            style={isBeatMaker ? { color: '#ffb800' } : undefined}
-          >
-            beat maker
-          </Link>
-          <Link
-            to="/reference-puller"
-            className={`nav-link${isReferencePuller ? ' active' : ''}`}
-            style={isReferencePuller ? { color: '#7c6cf0' } : undefined}
-          >
-            reference puller
-          </Link>
-          <Link
-            to="/character-maker"
-            className={`nav-link${isCharacterMaker ? ' active' : ''}`}
-            style={isCharacterMaker ? { color: '#57b894' } : undefined}
-          >
-            character maker
-          </Link>
-          <Link
-            to="/face-study"
-            className={`nav-link${isFaceStudy ? ' active' : ''}`}
-            style={isFaceStudy ? { color: '#e07a5f' } : undefined}
-          >
-            face study
-          </Link>
-          <Link
-            to="/fortune-teller"
-            className={`nav-link${isFortuneTeller ? ' active' : ''}`}
-            style={isFortuneTeller ? { color: '#9d4edd' } : undefined}
-          >
-            fortune teller
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>
