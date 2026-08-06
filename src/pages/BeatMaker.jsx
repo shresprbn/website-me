@@ -88,6 +88,8 @@ function SectionTransport({
   onClearAll,
   volume,
   onVolumeChange,
+  follow,
+  onToggleFollow,
   showBpm = true,
   accent = '#ffb800',
 }) {
@@ -120,6 +122,15 @@ function SectionTransport({
             onClick={onTogglePlay}
           >
             {playing ? 'stop ■' : 'play ▶'}
+          </button>
+          <button
+            type="button"
+            style={follow ? activeStyle : outlineBtn}
+            onClick={onToggleFollow}
+            aria-pressed={follow}
+            title="Auto-scroll to the bar that's currently playing"
+          >
+            follow ⟲
           </button>
           {showBpm ? (
             <label className="beat-maker-bpm">
@@ -269,19 +280,23 @@ export default function BeatMaker() {
   const [drumPages, setDrumPages] = useState(createDefaultPages)
   const [drumViewBar, setDrumViewBar] = useState(0)
   const [drumHead, setDrumHead] = useState(null)
+  const [drumFollow, setDrumFollow] = useState(false)
 
   const drumPagesRef = useRef(drumPages)
   const drumViewBarRef = useRef(drumViewBar)
   const drumsArmedRef = useRef(drumsArmed)
+  const drumFollowRef = useRef(drumFollow)
 
   drumPagesRef.current = drumPages
   drumViewBarRef.current = drumViewBar
   drumsArmedRef.current = drumsArmed
+  drumFollowRef.current = drumFollow
 
   // ── Melody ─────────────────────────────────────────────
   const [melodyPages, setMelodyPages] = useState(createDefaultMelodyPages)
   const [melodyViewBar, setMelodyViewBar] = useState(0)
   const [melodyHead, setMelodyHead] = useState(null)
+  const [melodyFollow, setMelodyFollow] = useState(false)
   const [collapsedOctaves, setCollapsedOctaves] = useState(() =>
     Object.fromEntries(MELODY_OCTAVES.map((o) => [o.id, !!o.defaultCollapsed])),
   )
@@ -289,6 +304,7 @@ export default function BeatMaker() {
   const melodyPagesRef = useRef(melodyPages)
   const melodyViewBarRef = useRef(melodyViewBar)
   const melodyArmedRef = useRef(melodyArmed)
+  const melodyFollowRef = useRef(melodyFollow)
   const bpmRef = useRef(bpm)
   const drumsVolumeRef = useRef(drumsVolume)
   const melodyVolumeRef = useRef(melodyVolume)
@@ -297,6 +313,7 @@ export default function BeatMaker() {
   melodyPagesRef.current = melodyPages
   melodyViewBarRef.current = melodyViewBar
   melodyArmedRef.current = melodyArmed
+  melodyFollowRef.current = melodyFollow
   bpmRef.current = bpm
   drumsVolumeRef.current = drumsVolume
   melodyVolumeRef.current = melodyVolume
@@ -313,13 +330,13 @@ export default function BeatMaker() {
       onStep: ({ drum, melody }) => {
         if (drum) {
           setDrumHead(drum)
-          if (drumsArmedRef.current && drum.barIndex !== drumViewBarRef.current) {
+          if (drumFollowRef.current && drum.barIndex !== drumViewBarRef.current) {
             setDrumViewBar(drum.barIndex)
           }
         }
         if (melody) {
           setMelodyHead(melody)
-          if (melodyArmedRef.current && melody.barIndex !== melodyViewBarRef.current) {
+          if (melodyFollowRef.current && melody.barIndex !== melodyViewBarRef.current) {
             setMelodyViewBar(melody.barIndex)
           }
         }
@@ -535,6 +552,8 @@ export default function BeatMaker() {
             onRemoveBar={removeDrumBar}
             onClearBar={clearDrumBar}
             onClearAll={clearAllDrums}
+            follow={drumFollow}
+            onToggleFollow={() => setDrumFollow((f) => !f)}
             showBpm
             accent="#ff6b9d"
           />
@@ -601,6 +620,8 @@ export default function BeatMaker() {
             onRemoveBar={removeMelodyBar}
             onClearBar={clearMelodyBar}
             onClearAll={clearAllMelody}
+            follow={melodyFollow}
+            onToggleFollow={() => setMelodyFollow((f) => !f)}
             showBpm={false}
             accent={MELODY_COLOR}
           />

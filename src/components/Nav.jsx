@@ -5,6 +5,7 @@ export default function Nav() {
   const isHome = pathname === '/'
   const isPlayground = pathname === '/playground'
   const isPixelMaker = pathname === '/pixel-maker'
+  const isGallery = pathname === '/gallery'
   const isBeatMaker = pathname === '/beat-maker'
   const isReferencePuller = pathname === '/reference-puller'
   const isCharacterMaker = pathname === '/character-maker'
@@ -40,6 +41,13 @@ export default function Nav() {
             style={isPixelMaker ? { color: '#4ecdc4' } : undefined}
           >
             pixel maker
+          </Link>
+          <Link
+            to="/gallery"
+            className={`nav-link${isGallery ? ' active' : ''}`}
+            style={isGallery ? { color: '#ff6b9d' } : undefined}
+          >
+            gallery
           </Link>
           <Link
             to="/beat-maker"

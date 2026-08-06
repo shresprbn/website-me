@@ -78,13 +78,13 @@ export function floodFill(pixels, startX, startY, fillColor) {
   return next
 }
 
-export function exportPng(pixels, scale = 16) {
+export function pixelsToCanvas(pixels, scale = 16) {
   const size = pixels.length
   const canvas = document.createElement('canvas')
   canvas.width = size * scale
   canvas.height = size * scale
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
+  if (!ctx) return canvas
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
@@ -95,6 +95,16 @@ export function exportPng(pixels, scale = 16) {
     }
   }
 
+  return canvas
+}
+
+export function pixelsToBlob(pixels, scale = 16) {
+  const canvas = pixelsToCanvas(pixels, scale)
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+}
+
+export function exportPng(pixels, scale = 16) {
+  const canvas = pixelsToCanvas(pixels, scale)
   canvas.toBlob((blob) => {
     if (!blob) return
     const url = URL.createObjectURL(blob)
