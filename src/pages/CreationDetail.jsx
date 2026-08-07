@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Nav from '../components/Nav'
+import BeatViewer from '../components/BeatViewer'
 import { supabase } from '../lib/supabase'
 import { fetchComments, postComment, COMMENTS_ENABLED } from '../lib/comments'
 
@@ -133,13 +134,23 @@ export default function CreationDetail() {
               <p className="playground-lede">saved {formatDate(creation.created_at)}</p>
             </div>
 
-            <div className="creation-detail-thumb">
-              {creation.thumbnail_url ? (
-                <img src={creation.thumbnail_url} alt={creation.title || creation.kind} />
-              ) : (
-                <div className="gallery-card-fallback">{creation.kind}</div>
-              )}
-            </div>
+            {creation.kind === 'beat' ? (
+              <div className="creation-detail-beat">
+                <BeatViewer
+                  bpm={creation.data?.bpm}
+                  drumPages={creation.data?.drumPages || []}
+                  melodyPages={creation.data?.melodyPages || []}
+                />
+              </div>
+            ) : (
+              <div className="creation-detail-thumb">
+                {creation.thumbnail_url ? (
+                  <img src={creation.thumbnail_url} alt={creation.title || creation.kind} />
+                ) : (
+                  <div className="gallery-card-fallback">{creation.kind}</div>
+                )}
+              </div>
+            )}
 
             <section className="comments-section">
               <div className="playground-eyebrow">// COMMENTS</div>

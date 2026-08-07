@@ -37,6 +37,27 @@ export function pagesHaveContent(pages) {
   return pages.some(barHasContent)
 }
 
+export function drumBarToBlob(bar, scale = 12) {
+  const canvas = document.createElement('canvas')
+  canvas.width = STEPS_PER_BAR * scale
+  canvas.height = TRACKS.length * scale
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return Promise.resolve(null)
+
+  ctx.fillStyle = '#f7f5f0'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  TRACKS.forEach((track, trackIndex) => {
+    bar[trackIndex].forEach((on, stepIndex) => {
+      if (!on) return
+      ctx.fillStyle = track.color
+      ctx.fillRect(stepIndex * scale + 1, trackIndex * scale + 1, scale - 2, scale - 2)
+    })
+  })
+
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+}
+
 export function cloneBar(bar) {
   return bar.map((track) => track.slice())
 }

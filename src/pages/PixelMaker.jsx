@@ -16,7 +16,7 @@ import {
   drawGridToCanvas,
   cellFromPointer,
 } from '../lib/pixelUtils'
-import { saveCreation, SAVE_ENABLED } from '../lib/gallery'
+import SaveToGallery from '../components/SaveToGallery'
 
 const TOOLS = [
   { id: 'pencil', label: 'pencil', icon: '✎' },
@@ -104,8 +104,6 @@ export default function PixelMaker() {
   const [toolsOpen, setToolsOpen] = useState(false)
   const [layersOpen, setLayersOpen] = useState(false)
   const [renameDraft, setRenameDraft] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [saveMsg, setSaveMsg] = useState('')
 
   toolRef.current = tool
   activeColorRef.current = activeColor
@@ -349,30 +347,6 @@ export default function PixelMaker() {
     setPickerColor(color)
   }
 
-  const saveToGallery = async () => {
-    if (!hasContentInLayers(layers)) {
-      window.alert('Nothing to save yet — draw something first.')
-      return
-    }
-    setSaving(true)
-    setSaveMsg('')
-    try {
-      const blob = await pixelsToBlob(composite, 8)
-      await saveCreation({
-        kind: 'pixel',
-        data: { gridSize, layers },
-        thumbnailBlob: blob,
-      })
-      setSaveMsg('saved ✓')
-    } catch (err) {
-      console.error(err)
-      setSaveMsg('save failed — try again')
-    } finally {
-      setSaving(false)
-      window.setTimeout(() => setSaveMsg(''), 4000)
-    }
-  }
-
   return (
     <div style={{ color: '#141414', background: '#f7f5f0', minHeight: '100vh' }}>
       <Nav />
@@ -414,18 +388,12 @@ export default function PixelMaker() {
             >
               download PNG ↓
             </button>
-            {SAVE_ENABLED && (
-              <button
-                type="button"
-                className="btn-pill pink"
-                style={{ padding: '11px 22px', fontSize: 13, border: 'none' }}
-                onClick={saveToGallery}
-                disabled={saving}
-              >
-                {saving ? 'saving…' : 'save to gallery ↑'}
-              </button>
-            )}
-            {saveMsg && <span className="pixel-maker-save-msg">{saveMsg}</span>}
+            <SaveToGallery
+              kind="pixel"
+              hasContent={() => hasContentInLayers(layers)}
+              getData={() => ({ gridSize, layers })}
+              getThumbnailBlob={() => pixelsToBlob(composite, 8)}
+            />
           </div>
         </div>
 

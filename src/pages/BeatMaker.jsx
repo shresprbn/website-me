@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
+import SaveToGallery from '../components/SaveToGallery'
 import {
   TRACKS,
   STEPS_PER_BAR,
@@ -14,6 +15,7 @@ import {
   pagesHaveContent,
   createSequencer,
   playTrackHit,
+  drumBarToBlob,
 } from '../lib/beatUtils'
 import {
   MELODY_NOTES,
@@ -750,6 +752,16 @@ export default function BeatMaker() {
             </div>
 
           </div>
+        </section>
+
+        <section className="beat-maker-section">
+          <div className="beat-maker-section-label">// SAVE</div>
+          <SaveToGallery
+            kind="beat"
+            hasContent={() => pagesHaveContent(drumPages) || melodyPagesHaveContent(melodyPages)}
+            getData={() => ({ bpm, drumPages, melodyPages })}
+            getThumbnailBlob={() => drumBarToBlob(drumPages.find(barHasContent) || drumPages[0])}
+          />
         </section>
       </div>
     </div>
