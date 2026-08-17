@@ -9,14 +9,18 @@ const PLAYGROUND_ROUTES = [
   '/reference-puller',
   '/face-study',
   '/fortune-teller',
+  '/gift-package',
+  '/gift',
 ]
 
 export default function Nav() {
   const { pathname } = useLocation()
   const isHome = pathname === '/'
   const isGallery = pathname === '/gallery' || pathname.startsWith('/gallery/')
+  const isNotes = pathname === '/notes-wall'
   const isPlaygroundSection =
     !isGallery &&
+    !isNotes &&
     PLAYGROUND_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))
 
   const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
@@ -48,6 +52,13 @@ export default function Nav() {
             style={isGallery ? { color: '#ff6b9d' } : undefined}
           >
             gallery
+          </Link>
+          <Link
+            to="/notes-wall"
+            className={`nav-link${isNotes ? ' active' : ''}`}
+            style={isNotes ? { color: '#ff6b9d' } : undefined}
+          >
+            notes
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>

@@ -88,8 +88,10 @@ export default function Gallery() {
                     <div className="gallery-card-fallback">{c.kind}</div>
                   )}
                 </div>
+                {c.title && <div className="gallery-card-title">{c.title}</div>}
                 <div className="gallery-card-meta">
                   <span className="gallery-card-kind">{c.kind}</span>
+                  {c.creator_name && <span className="gallery-card-author">by {c.creator_name}</span>}
                   <span className="gallery-card-date">{formatDate(c.created_at)}</span>
                 </div>
               </Link>

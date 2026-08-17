@@ -131,7 +131,10 @@ export default function CreationDetail() {
             <div className="playground-header">
               <div className="playground-eyebrow">// {creation.kind.toUpperCase()}</div>
               <h1 className="playground-title">{creation.title || 'Untitled'}</h1>
-              <p className="playground-lede">saved {formatDate(creation.created_at)}</p>
+              <p className="playground-lede">
+                {creation.creator_name ? `by ${creation.creator_name} · ` : ''}
+                saved {formatDate(creation.created_at)}
+              </p>
             </div>
 
             {creation.kind === 'beat' ? (

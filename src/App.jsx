@@ -10,6 +10,9 @@ import ReferencePuller from './pages/ReferencePuller'
 import CharacterMaker from './pages/CharacterMaker'
 import FaceStudy from './pages/FaceStudy'
 import FortuneTeller from './pages/FortuneTeller'
+import GiftMaker from './pages/GiftMaker'
+import GiftView from './pages/GiftView'
+import StickyNotes from './pages/StickyNotes'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -28,6 +31,9 @@ export default function App() {
         <Route path="/character-maker" element={<CharacterMaker />} />
         <Route path="/face-study" element={<FaceStudy />} />
         <Route path="/fortune-teller" element={<FortuneTeller />} />
+        <Route path="/gift-package" element={<GiftMaker />} />
+        <Route path="/gift/:id" element={<GiftView />} />
+        <Route path="/notes-wall" element={<StickyNotes />} />
       </Routes>
     </BrowserRouter>
   )

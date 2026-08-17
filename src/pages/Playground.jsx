@@ -58,6 +58,20 @@ const ITEMS = [
     title: 'Gallery',
     blurb: 'What people made.',
   },
+  {
+    to: '/gift-package',
+    glyph: '🎁',
+    color: '#e0708a',
+    title: 'Gift Package',
+    blurb: 'Notes, a mixtape, videos, stickers — one link.',
+  },
+  {
+    to: '/notes-wall',
+    glyph: '📌',
+    color: '#ffb800',
+    title: 'Leave a Note',
+    blurb: 'Stick a little note to the wall.',
+  },
 ]
 
 export default function Playground() {
