@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
 import { NOTES_ENABLED, NOTES_PAGE_SIZE, addNote, deleteNote, fetchNotesPage } from '../lib/notes'
+import { DEBUG_PASSPHRASE, useDebugMode } from '../hooks/useDebugMode'
 
-const DEBUG_PHRASE = 'axnusic'
 const NOTE_COLORS = ['#ffe28a', '#ffc2d1', '#b9e8d8', '#b8dcf2', '#d9c9f5', '#ffcfa3']
 const MAX_BODY = 180
 
@@ -39,10 +39,8 @@ export default function StickyNotes() {
   const [postError, setPostError] = useState('')
   const textareaRef = useRef(null)
 
-  const [debugMode, setDebugMode] = useState(false)
-  const [flash, setFlash] = useState(false)
+  const { debugMode, flash } = useDebugMode()
   const [removingIds, setRemovingIds] = useState(() => new Set())
-  const keyBufferRef = useRef('')
 
   const totalPages = Math.max(1, Math.ceil(total / NOTES_PAGE_SIZE))
 
@@ -64,26 +62,6 @@ export default function StickyNotes() {
   useEffect(() => {
     load(page)
   }, [page, load])
-
-  // easter egg: type "axnusic" anywhere (not while typing in a field) to toggle debug mode
-  useEffect(() => {
-    const onKeyDown = (e) => {
-      const tag = document.activeElement?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return
-      if (e.metaKey || e.ctrlKey || e.altKey) return
-      if (e.key.length !== 1 || !/[a-z]/i.test(e.key)) return
-
-      keyBufferRef.current = (keyBufferRef.current + e.key.toLowerCase()).slice(-DEBUG_PHRASE.length)
-      if (keyBufferRef.current === DEBUG_PHRASE) {
-        keyBufferRef.current = ''
-        setDebugMode((d) => !d)
-        setFlash(true)
-        setTimeout(() => setFlash(false), 650)
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
 
   const openModal = () => {
     setPostError('')
@@ -118,7 +96,7 @@ export default function StickyNotes() {
     setRemovingIds((prev) => new Set(prev).add(id))
     setTimeout(async () => {
       try {
-        await deleteNote(id, DEBUG_PHRASE)
+        await deleteNote(id, DEBUG_PASSPHRASE)
         setNotes((prev) => prev.filter((n) => n.id !== id))
         setTotal((t) => Math.max(0, t - 1))
       } catch (err) {
@@ -201,7 +179,7 @@ export default function StickyNotes() {
       {debugMode && (
         <div className="notes-debug-badge">
           <span>🐛 debug mode</span>
-          <span className="notes-debug-hint">click × on a note to delete it · type "{DEBUG_PHRASE}" again to exit</span>
+          <span className="notes-debug-hint">click × on a note to delete it · type "{DEBUG_PASSPHRASE}" again to exit</span>
         </div>
       )}
 

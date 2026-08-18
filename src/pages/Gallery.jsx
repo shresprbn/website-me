@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
-import { fetchCreations, GALLERY_ENABLED } from '../lib/gallery'
+import { deleteCreation, fetchCreations, GALLERY_ENABLED } from '../lib/gallery'
+import { DEBUG_PASSPHRASE, useDebugMode } from '../hooks/useDebugMode'
 
 const KINDS = [
   { id: null, label: 'all' },
@@ -18,6 +19,8 @@ export default function Gallery() {
   const [kind, setKind] = useState(null)
   const [creations, setCreations] = useState([])
   const [status, setStatus] = useState('loading')
+  const { debugMode, flash } = useDebugMode()
+  const [removingIds, setRemovingIds] = useState(() => new Set())
 
   useEffect(() => {
     if (!GALLERY_ENABLED) {
@@ -41,10 +44,28 @@ export default function Gallery() {
     }
   }, [kind])
 
+  const removeCreation = (id) => {
+    setRemovingIds((prev) => new Set(prev).add(id))
+    setTimeout(async () => {
+      try {
+        await deleteCreation(id, DEBUG_PASSPHRASE)
+        setCreations((prev) => prev.filter((c) => c.id !== id))
+      } catch (err) {
+        window.alert(err.message || 'Could not delete.')
+      } finally {
+        setRemovingIds((prev) => {
+          const next = new Set(prev)
+          next.delete(id)
+          return next
+        })
+      }
+    }, 280)
+  }
+
   return (
     <div style={{ color: '#141414', background: '#f7f5f0', minHeight: '100vh' }}>
       <Nav />
-      <div className="container gallery-page">
+      <div className={`container gallery-page${flash ? ' notes-page--flash' : ''}`}>
         <div className="playground-header">
           <div className="playground-eyebrow">// GALLERY</div>
           <h1 className="playground-title">What people made.</h1>
@@ -80,7 +101,25 @@ export default function Gallery() {
         {status === 'ready' && creations.length > 0 && (
           <div className="gallery-grid">
             {creations.map((c) => (
-              <Link key={c.id} to={`/gallery/${c.id}`} className="gallery-card">
+              <Link
+                key={c.id}
+                to={`/gallery/${c.id}`}
+                className={`gallery-card${removingIds.has(c.id) ? ' gallery-card--removing' : ''}`}
+              >
+                {debugMode && (
+                  <button
+                    type="button"
+                    className="gallery-card-delete"
+                    title="delete creation"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      removeCreation(c.id)
+                    }}
+                  >
+                    ×
+                  </button>
+                )}
                 <div className="gallery-card-thumb">
                   {c.thumbnail_url ? (
                     <img src={c.thumbnail_url} alt={c.title || c.kind} loading="lazy" />
@@ -99,6 +138,15 @@ export default function Gallery() {
           </div>
         )}
       </div>
+
+      {debugMode && (
+        <div className="notes-debug-badge">
+          <span>🐛 debug mode</span>
+          <span className="notes-debug-hint">click × on a card to delete it · type "{DEBUG_PASSPHRASE}" again to exit</span>
+        </div>
+      )}
+
+      {flash && <div className="notes-debug-flash-overlay">// DEBUG MODE {debugMode ? 'ENABLED' : 'DISABLED'}</div>}
     </div>
   )
 }

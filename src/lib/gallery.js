@@ -36,3 +36,17 @@ export async function fetchCreations(kind, limit = 60) {
   if (error) throw error
   return data
 }
+
+export async function deleteCreation(id, passphrase) {
+  if (!API_BASE_URL) throw new Error('Not configured.')
+  const res = await fetch(`${API_BASE_URL}/creations/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ passphrase }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || `Could not delete (${res.status})`)
+  }
+  return res.json()
+}

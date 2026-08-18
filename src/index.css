@@ -663,16 +663,37 @@ a { color: inherit; }
   gap: 18px;
 }
 .gallery-card {
+  position: relative;
   background: #fff;
   border: 1px solid #e8e3d8;
   border-radius: 8px;
   overflow: hidden;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: transform .2s ease, box-shadow .2s ease, opacity .28s ease;
   text-decoration: none;
   color: inherit;
   display: block;
 }
 .gallery-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
+.gallery-card--removing { transform: scale(.85) !important; opacity: 0; pointer-events: none; }
+.gallery-card-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #141414;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,.3);
+}
 .gallery-card-thumb {
   aspect-ratio: 1;
   background: #f7f5f0;
