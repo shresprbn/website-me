@@ -26,7 +26,13 @@ function BeatMarks() {
   )
 }
 
-export default function BeatViewer({ bpm, drumPages, melodyPages }) {
+export default function BeatViewer({
+  bpm,
+  drumPages,
+  melodyPages,
+  drumsVolume: initialDrumsVolume,
+  melodyVolume: initialMelodyVolume,
+}) {
   const seqRef = useRef(null)
   const dataRef = useRef({ bpm, drumPages, melodyPages })
   dataRef.current = { bpm, drumPages, melodyPages }
@@ -34,6 +40,16 @@ export default function BeatViewer({ bpm, drumPages, melodyPages }) {
   const [playing, setPlaying] = useState(false)
   const [viewBar, setViewBar] = useState(0)
   const [head, setHead] = useState(null)
+  const [drumsVolume, setDrumsVolume] = useState(
+    typeof initialDrumsVolume === 'number' ? initialDrumsVolume : 0.9,
+  )
+  const [melodyVolume, setMelodyVolume] = useState(
+    typeof initialMelodyVolume === 'number' ? initialMelodyVolume : 0.85,
+  )
+  const drumsVolumeRef = useRef(drumsVolume)
+  const melodyVolumeRef = useRef(melodyVolume)
+  drumsVolumeRef.current = drumsVolume
+  melodyVolumeRef.current = melodyVolume
 
   const barCount = Math.max(drumPages.length, melodyPages.length, 1)
 
@@ -42,6 +58,8 @@ export default function BeatViewer({ bpm, drumPages, melodyPages }) {
       getPages: () => dataRef.current.drumPages,
       getMelodyPages: () => dataRef.current.melodyPages,
       getBpm: () => dataRef.current.bpm || 120,
+      getDrumsVolume: () => drumsVolumeRef.current,
+      getMelodyVolume: () => melodyVolumeRef.current,
       onStep: ({ drum, melody }) => {
         const pos = drum || melody
         if (!pos) return
@@ -104,6 +122,35 @@ export default function BeatViewer({ bpm, drumPages, melodyPages }) {
             </button>
           </>
         )}
+      </div>
+
+      <div className="beat-viewer-volumes">
+        <label className="beat-maker-volume">
+          <span>drums vol</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={drumsVolume}
+            onChange={(e) => setDrumsVolume(Number(e.target.value))}
+            aria-label="Drums volume"
+          />
+          <span className="beat-maker-volume-val">{Math.round(drumsVolume * 100)}%</span>
+        </label>
+        <label className="beat-maker-volume">
+          <span>melody vol</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={melodyVolume}
+            onChange={(e) => setMelodyVolume(Number(e.target.value))}
+            aria-label="Melody volume"
+          />
+          <span className="beat-maker-volume-val">{Math.round(melodyVolume * 100)}%</span>
+        </label>
       </div>
 
       {drumBar && (

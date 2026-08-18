@@ -143,6 +143,8 @@ export default function CreationDetail() {
                   bpm={creation.data?.bpm}
                   drumPages={creation.data?.drumPages || []}
                   melodyPages={creation.data?.melodyPages || []}
+                  drumsVolume={creation.data?.drumsVolume}
+                  melodyVolume={creation.data?.melodyVolume}
                 />
               </div>
             ) : (

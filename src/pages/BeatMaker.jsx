@@ -759,7 +759,7 @@ export default function BeatMaker() {
           <SaveToGallery
             kind="beat"
             hasContent={() => pagesHaveContent(drumPages) || melodyPagesHaveContent(melodyPages)}
-            getData={() => ({ bpm, drumPages, melodyPages })}
+            getData={() => ({ bpm, drumsVolume, melodyVolume, drumPages, melodyPages })}
             getThumbnailBlob={() => drumBarToBlob(drumPages.find(barHasContent) || drumPages[0])}
           />
         </section>
