@@ -72,6 +72,13 @@ const ITEMS = [
     title: 'Leave a Note',
     blurb: 'Stick a little note to the wall.',
   },
+  {
+    to: '/garbage-run',
+    glyph: '🚛',
+    color: '#f2b705',
+    title: 'Garbage Run',
+    blurb: 'Snake, but it\'s a garbage truck eating bananas.',
+  },
 ]
 
 export default function Playground() {

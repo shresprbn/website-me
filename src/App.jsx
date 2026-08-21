@@ -13,6 +13,7 @@ import FortuneTeller from './pages/FortuneTeller'
 import GiftMaker from './pages/GiftMaker'
 import GiftView from './pages/GiftView'
 import StickyNotes from './pages/StickyNotes'
+import GarbageRun from './pages/GarbageRun'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/gift-package" element={<GiftMaker />} />
         <Route path="/gift/:id" element={<GiftView />} />
         <Route path="/notes-wall" element={<StickyNotes />} />
+        <Route path="/garbage-run" element={<GarbageRun />} />
       </Routes>
     </BrowserRouter>
   )

@@ -11,6 +11,7 @@ const PLAYGROUND_ROUTES = [
   '/fortune-teller',
   '/gift-package',
   '/gift',
+  '/garbage-run',
 ]
 
 export default function Nav() {
