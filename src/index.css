@@ -2248,10 +2248,15 @@ a { color: inherit; }
   overflow: hidden;
 }
 .garbage-run-segment {
+  /* No CSS transition on purpose — classic grid-snapped movement. Easing
+     each segment's left/top independently looked smooth in a straight run,
+     but near turns two adjacent segments can slide along genuinely
+     different vectors for a frame (each one's motion is derived from its
+     own array slot's prior neighbor), which showed up as real gaps between
+     segments, not just a timing hiccup. Snapping keeps every segment
+     exactly grid-aligned and touching on every single frame. */
   position: absolute;
   display: block;
-  transition: left .09s linear, top .09s linear;
-  will-change: left, top;
 }
 .garbage-run-food {
   position: absolute;
@@ -2279,8 +2284,85 @@ a { color: inherit; }
   padding: 20px;
 }
 .garbage-run-overlay-score { font-size: 16px; font-weight: 700; margin: 0; }
-.garbage-run-overlay--crashed { background: rgba(20, 20, 20, .55); }
-.garbage-run-crashed-glyph { font-size: 48px; }
+.garbage-run-overlay--crashed {
+  background: rgba(20, 20, 20, .55);
+  animation: garbageRunFlash .45s ease-out;
+}
+.garbage-run-crashed-glyph {
+  font-size: 48px;
+  display: inline-block;
+  animation: garbageRunImpact .4s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+@keyframes garbageRunFlash {
+  0% { background: rgba(224, 74, 74, .65); }
+  100% { background: rgba(20, 20, 20, .55); }
+}
+@keyframes garbageRunImpact {
+  0% { transform: scale(.2) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.garbage-run-board--shake { animation: garbageRunShake .5s cubic-bezier(.36, .07, .19, .97) both; }
+@keyframes garbageRunShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-8px, -4px); }
+  20% { transform: translate(8px, 4px); }
+  30% { transform: translate(-8px, 4px); }
+  40% { transform: translate(8px, -4px); }
+  50% { transform: translate(-6px, 2px); }
+  60% { transform: translate(6px, -2px); }
+  70% { transform: translate(-4px, 2px); }
+  80% { transform: translate(4px, -2px); }
+  90% { transform: translate(-2px, 0); }
+}
+
+.garbage-run-dino-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #3f5c2e;
+  margin: 0 0 16px;
+  animation: garbageRunDinoHintPulse 1.8s ease-in-out infinite;
+}
+.garbage-run-dino-hint strong { letter-spacing: .04em; }
+@keyframes garbageRunDinoHintPulse {
+  0%, 100% { opacity: .7; }
+  50% { opacity: 1; }
+}
+
+/* Dinos roam the whole viewport, not just the board — fixed so they can
+   walk anywhere on screen regardless of scroll position. Grab-and-drag any
+   of them; there can be several at once. */
+.garbage-run-dino {
+  position: fixed;
+  display: block;
+  height: auto;
+  pointer-events: auto;
+  z-index: 40;
+  cursor: grab;
+  filter: drop-shadow(0 6px 6px rgba(20, 20, 20, .25));
+  transition-property: left, top;
+  transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.garbage-run-dino:active { cursor: grabbing; }
+
+.garbage-run-drag-line {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 39;
+}
+.garbage-run-drag-line line {
+  stroke: #141414;
+  stroke-width: 2;
+  stroke-dasharray: 6 7;
+  stroke-linecap: round;
+  opacity: .55;
+}
 
 .garbage-run-dpad {
   display: grid;
@@ -2306,17 +2388,26 @@ a { color: inherit; }
 
 .garbage-run-submit-status { font-size: 12px; color: #8a8a8a; margin: 0; }
 
-.garbage-run-crash-row {
+/* Game (board/dpad/crash panel) on the left, leaderboard always visible on
+   the right — no more waiting for a crash to see the top runs. */
+.garbage-run-layout {
   display: flex;
   gap: 32px;
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 8px;
+}
+.garbage-run-main-col {
+  flex: 1 1 auto;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .garbage-run-crash-panel {
-  flex: 1 1 280px;
+  width: 100%;
   max-width: 360px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2333,7 +2424,13 @@ a { color: inherit; }
   font-size: 20px;
   margin: 0;
 }
-.garbage-run-leaderboard { flex: 1 1 320px; max-width: 380px; margin: 0; }
+.garbage-run-leaderboard {
+  flex: 1 1 320px;
+  max-width: 380px;
+  margin: 0;
+  position: sticky;
+  top: 24px;
+}
 .garbage-run-leaderboard-label {
   font-family: 'Space Mono', monospace;
   font-size: 11px;
@@ -2361,6 +2458,7 @@ a { color: inherit; }
 @media (max-width: 640px) {
   .garbage-run-page { padding: 32px 20px 80px; }
   .garbage-run-dpad { grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); }
-  .garbage-run-crash-row { flex-direction: column; align-items: stretch; }
+  .garbage-run-layout { flex-direction: column; align-items: stretch; }
   .garbage-run-crash-panel, .garbage-run-leaderboard { max-width: none; }
+  .garbage-run-leaderboard { position: static; }
 }

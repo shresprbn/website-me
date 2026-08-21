@@ -49,14 +49,18 @@ export function directionBetween(from, to) {
 // Given the two tile sides a body segment connects to (toward the head,
 // toward the tail), pick which truck body sprite hugs that corner —
 // straight pieces when the sides are opposite, otherwise a turn.
+//
+// Pixel-checked against the actual sprite art: body_tl.png's opaque pixels
+// hug the N and W edges of its tile, body_tr.png hugs N+E, body_bl.png hugs
+// S+W, body_br.png hugs S+E — the plain, naming-matches-geometry mapping.
 export function bodySpriteKey(sideToHead, sideToTail) {
   const sides = new Set([sideToHead, sideToTail])
   if (sides.has('N') && sides.has('S')) return 'bodyVertical'
   if (sides.has('E') && sides.has('W')) return 'bodyHorizontal'
-  if (sides.has('N') && sides.has('E')) return 'bodyTR'
   if (sides.has('N') && sides.has('W')) return 'bodyTL'
-  if (sides.has('S') && sides.has('E')) return 'bodyBR'
+  if (sides.has('N') && sides.has('E')) return 'bodyTR'
   if (sides.has('S') && sides.has('W')) return 'bodyBL'
+  if (sides.has('S') && sides.has('E')) return 'bodyBR'
   return 'bodyHorizontal'
 }
 
