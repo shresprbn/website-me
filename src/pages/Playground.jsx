@@ -87,6 +87,13 @@ const ITEMS = [
     blurb: 'Snake, but it\'s a garbage truck eating bananas.',
   },
   {
+    to: '/word-zap',
+    glyph: '⚡',
+    color: '#4ecdc4',
+    title: 'Word Zap',
+    blurb: 'Words fall, you type — zap them before they hit the floor.',
+  },
+  {
     to: '/pomodoro',
     glyph: '⏱',
     color: '#ff6b9d',

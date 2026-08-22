@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
 import { NOTES_ENABLED, NOTES_PAGE_SIZE, addNote, deleteNote, fetchNotesPage } from '../lib/notes'
 import { DEBUG_PASSPHRASE, useDebugMode } from '../hooks/useDebugMode'
+import { useModal } from '../components/ModalProvider'
 
 const NOTE_COLORS = ['#ffe28a', '#ffc2d1', '#b9e8d8', '#b8dcf2', '#d9c9f5', '#ffcfa3']
 const MAX_BODY = 180
@@ -27,6 +28,7 @@ function formatDate(iso) {
 }
 
 export default function StickyNotes() {
+  const { alertUser } = useModal()
   const [page, setPage] = useState(0)
   const [notes, setNotes] = useState([])
   const [total, setTotal] = useState(0)
@@ -100,7 +102,7 @@ export default function StickyNotes() {
         setNotes((prev) => prev.filter((n) => n.id !== id))
         setTotal((t) => Math.max(0, t - 1))
       } catch (err) {
-        window.alert(err.message || 'Could not delete note.')
+        await alertUser(err.message || 'Could not delete note.')
       } finally {
         setRemovingIds((prev) => {
           const next = new Set(prev)

@@ -15,34 +15,39 @@ import GiftMaker from './pages/GiftMaker'
 import GiftView from './pages/GiftView'
 import StickyNotes from './pages/StickyNotes'
 import GarbageRun from './pages/GarbageRun'
+import WordZap from './pages/WordZap'
 import PomodoroLanding from './pages/PomodoroLanding'
 import PomodoroTimer from './pages/PomodoroTimer'
 import ScrollToTop from './components/ScrollToTop'
+import { ModalProvider } from './components/ModalProvider'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/playground" element={<Playground />} />
-        <Route path="/bounce-lab" element={<BounceLab />} />
-        <Route path="/pixel-maker" element={<PixelMaker />} />
-        <Route path="/font-maker" element={<FontMaker />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/gallery/:id" element={<CreationDetail />} />
-        <Route path="/beat-maker" element={<BeatMaker />} />
-        <Route path="/reference-puller" element={<ReferencePuller />} />
-        <Route path="/character-maker" element={<CharacterMaker />} />
-        <Route path="/face-study" element={<FaceStudy />} />
-        <Route path="/fortune-teller" element={<FortuneTeller />} />
-        <Route path="/gift-package" element={<GiftMaker />} />
-        <Route path="/gift/:id" element={<GiftView />} />
-        <Route path="/notes-wall" element={<StickyNotes />} />
-        <Route path="/garbage-run" element={<GarbageRun />} />
-        <Route path="/pomodoro" element={<PomodoroLanding />} />
-        <Route path="/pomodoro/:roomId" element={<PomodoroTimer />} />
-      </Routes>
+      <ModalProvider>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/playground" element={<Playground />} />
+          <Route path="/bounce-lab" element={<BounceLab />} />
+          <Route path="/pixel-maker" element={<PixelMaker />} />
+          <Route path="/font-maker" element={<FontMaker />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/gallery/:id" element={<CreationDetail />} />
+          <Route path="/beat-maker" element={<BeatMaker />} />
+          <Route path="/reference-puller" element={<ReferencePuller />} />
+          <Route path="/character-maker" element={<CharacterMaker />} />
+          <Route path="/face-study" element={<FaceStudy />} />
+          <Route path="/fortune-teller" element={<FortuneTeller />} />
+          <Route path="/gift-package" element={<GiftMaker />} />
+          <Route path="/gift/:id" element={<GiftView />} />
+          <Route path="/notes-wall" element={<StickyNotes />} />
+          <Route path="/garbage-run" element={<GarbageRun />} />
+          <Route path="/word-zap" element={<WordZap />} />
+          <Route path="/pomodoro" element={<PomodoroLanding />} />
+          <Route path="/pomodoro/:roomId" element={<PomodoroTimer />} />
+        </Routes>
+      </ModalProvider>
     </BrowserRouter>
   )
 }

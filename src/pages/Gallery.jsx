@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
 import { deleteCreation, fetchCreations, GALLERY_ENABLED } from '../lib/gallery'
 import { DEBUG_PASSPHRASE, useDebugMode } from '../hooks/useDebugMode'
+import { useModal } from '../components/ModalProvider'
 
 const KINDS = [
   { id: null, label: 'all' },
@@ -21,6 +22,7 @@ export default function Gallery() {
   const [status, setStatus] = useState('loading')
   const { debugMode, flash } = useDebugMode()
   const [removingIds, setRemovingIds] = useState(() => new Set())
+  const { alertUser } = useModal()
 
   useEffect(() => {
     if (!GALLERY_ENABLED) {
@@ -51,7 +53,7 @@ export default function Gallery() {
         await deleteCreation(id, DEBUG_PASSPHRASE)
         setCreations((prev) => prev.filter((c) => c.id !== id))
       } catch (err) {
-        window.alert(err.message || 'Could not delete.')
+        await alertUser(err.message || 'Could not delete.')
       } finally {
         setRemovingIds((prev) => {
           const next = new Set(prev)

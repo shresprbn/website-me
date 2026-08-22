@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
 import { GIFT_THEMES, GIFTS_ENABLED, parseSpotifyUrl, parseYoutubeUrl, saveGift } from '../lib/gifts'
+import { useModal } from '../components/ModalProvider'
 
 const MAX_NOTES = 6
 const MAX_SONGS = 8
@@ -53,6 +54,7 @@ function SectionLabel({ children, count, max }) {
 }
 
 export default function GiftMaker() {
+  const { alertUser, copyLink: copyLinkModal } = useModal()
   const [title, setTitle] = useState('')
   const [toName, setToName] = useState('')
   const [fromName, setFromName] = useState('')
@@ -169,7 +171,7 @@ export default function GiftMaker() {
 
   const wrapItUp = async () => {
     if (!hasAnything) {
-      window.alert('Add at least one note, song, link, or sticker first.')
+      await alertUser('Add at least one note, song, link, or sticker first.')
       return
     }
     setSaving(true)
@@ -201,7 +203,7 @@ export default function GiftMaker() {
       setCopied(true)
       setTimeout(() => setCopied(false), 1800)
     } catch {
-      window.prompt('Copy this link:', shareUrl)
+      await copyLinkModal(shareUrl)
     }
   }
 

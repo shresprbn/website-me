@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { saveCreation, SAVE_ENABLED } from '../lib/gallery'
+import { useModal } from './ModalProvider'
 
 export default function SaveToGallery({ kind, getData, getThumbnailBlob, hasContent }) {
+  const { alertUser, copyLink: copyLinkModal } = useModal()
   const [modalOpen, setModalOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [name, setName] = useState('')
@@ -31,9 +33,9 @@ export default function SaveToGallery({ kind, getData, getThumbnailBlob, hasCont
 
   if (!SAVE_ENABLED) return null
 
-  const openModal = () => {
+  const openModal = async () => {
     if (!hasContent()) {
-      window.alert('Nothing to save yet — make something first.')
+      await alertUser('Nothing to save yet — make something first.')
       return
     }
     setError('')
@@ -54,7 +56,7 @@ export default function SaveToGallery({ kind, getData, getThumbnailBlob, hasCont
       setCopied(true)
       setTimeout(() => setCopied(false), 1800)
     } catch {
-      window.prompt('Copy this link:', shareUrl)
+      await copyLinkModal(shareUrl)
     }
   }
 

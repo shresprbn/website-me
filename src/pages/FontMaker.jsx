@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
+import { useModal } from '../components/ModalProvider'
 import {
   createEmptyGrid,
   hasContent,
@@ -69,6 +70,7 @@ function safeFileName(name) {
 }
 
 export default function FontMaker() {
+  const { confirmAction } = useModal()
   // Big canvas — for precise editing of whichever glyph is focused.
   const canvasRef = useRef(null)
   const guideCanvasRef = useRef(null)
@@ -242,27 +244,27 @@ export default function FontMaker() {
     setSelectedChar(next)
   }
 
-  const changeGridSize = (size) => {
+  const changeGridSize = async (size) => {
     if (size === gridSize) return
     if (anyGlyphHasContent(glyphs)) {
-      const ok = window.confirm('Changing grid size will clear every letter you\'ve drawn. Continue?')
+      const ok = await confirmAction('Changing grid size will clear every letter you\'ve drawn. Continue?', { danger: true })
       if (!ok) return
     }
     setGridSize(size)
     setGlyphs(createEmptyFontGlyphs(size))
   }
 
-  const clearGlyph = () => {
+  const clearGlyph = async () => {
     const grid = glyphs[selectedChar]
     if (!grid || !hasContent(grid)) return
-    const ok = window.confirm(`Clear "${selectedChar}"?`)
+    const ok = await confirmAction(`Clear "${selectedChar}"?`, { danger: true })
     if (!ok) return
     setGlyphs((prev) => ({ ...prev, [selectedChar]: createEmptyGrid(gridSize) }))
   }
 
-  const clearAll = () => {
+  const clearAll = async () => {
     if (!anyGlyphHasContent(glyphs)) return
-    const ok = window.confirm('Clear every letter and number?')
+    const ok = await confirmAction('Clear every letter and number?', { danger: true })
     if (!ok) return
     setGlyphs(createEmptyFontGlyphs(gridSize))
   }

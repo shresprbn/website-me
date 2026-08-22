@@ -89,6 +89,7 @@ a { color: inherit; }
 .btn-pill:hover { transform: translateY(-2px); }
 .btn-pill.dark { background: #141414; color: #fff; }
 .btn-pill.pink { background: #ff6b9d; color: #3d0d22; }
+.btn-pill.danger { background: #e07a5f; color: #fff; }
 
 /* ── Fun fact shuffle button ─────────────────────────────── */
 .shuffle-btn {
@@ -2836,6 +2837,94 @@ a { color: inherit; }
   text-decoration: underline;
 }
 .pomodoro-rename-link:hover { color: #141414; }
+
+/* ── Word Zap ────────────────────────────────────────────── */
+.word-zap-page { padding: 64px 32px 100px; }
+
+.word-zap-hud { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+.word-zap-stat { font-family: 'Space Mono', monospace; font-size: 14px; color: #8a8a8a; }
+.word-zap-stat strong { color: #141414; font-size: 16px; }
+.word-zap-lives { display: inline-flex; gap: 3px; font-size: 16px; letter-spacing: 1px; }
+.word-zap-heart { color: #ff6b9d; }
+.word-zap-heart--lost { color: #d8d2c2; }
+
+.word-zap-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.word-zap-main-col {
+  flex: 1 1 auto;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.word-zap-board {
+  position: relative;
+  margin: 0 auto 28px;
+  background: #eef0e4;
+  border: 2px solid #d8cdb0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.word-zap-board--miss { animation: wordZapMissFlash .18s ease-out; }
+@keyframes wordZapMissFlash {
+  0% { box-shadow: inset 0 0 0 3px #e07a5f; }
+  100% { box-shadow: inset 0 0 0 3px transparent; }
+}
+
+.word-zap-word {
+  position: absolute;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1.5px solid #e0dbd0;
+  color: #8a8a8a;
+}
+.word-zap-word--locked { border-color: #ff6b9d; box-shadow: 0 2px 10px rgba(255, 107, 157, .25); }
+.word-zap-word-matched { color: #ff6b9d; }
+.word-zap-word-rest { color: #141414; }
+
+.word-zap-fx { position: absolute; inset: 0; pointer-events: none; }
+.word-zap-zap-line {
+  stroke: #ff6b9d;
+  stroke-width: 3;
+  stroke-linecap: round;
+  animation: wordZapLine .22s ease-out forwards;
+}
+@keyframes wordZapLine {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.word-zap-popup {
+  position: absolute;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: #4ecdc4;
+  pointer-events: none;
+  animation: wordZapPopup .7s ease-out forwards;
+}
+@keyframes wordZapPopup {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-26px); opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  .word-zap-page { padding: 32px 20px 80px; }
+  .word-zap-layout { flex-direction: column; align-items: stretch; }
+  .word-zap-leaderboard { max-width: none; }
+}
 
 @media (max-width: 720px) {
   .pomodoro-page { padding: 40px 20px 80px; }

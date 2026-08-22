@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
 import SaveToGallery from '../components/SaveToGallery'
+import { useModal } from '../components/ModalProvider'
 import {
   TRACKS,
   STEPS_PER_BAR,
@@ -271,6 +272,7 @@ function useSectionSwipe(viewBar, setViewBar, pageCount) {
 }
 
 export default function BeatMaker() {
+  const { confirmAction, alertUser } = useModal()
   // ── Shared transport clock; each part can mute independently ──
   const [bpm, setBpm] = useState(DEFAULT_BPM)
   const [drumsVolume, setDrumsVolume] = useState(0.9)
@@ -437,29 +439,29 @@ export default function BeatMaker() {
     playMelodyByIndex(ctx, noteIndex, ctx.currentTime, melodyVolumeRef.current)
   }
 
-  const addDrumBar = () => {
+  const addDrumBar = async () => {
     if (drumPages.length >= MAX_BARS) {
-      window.alert(`Max ${MAX_BARS} bars.`)
+      await alertUser(`Max ${MAX_BARS} bars.`)
       return
     }
     setDrumPages((prev) => [...prev, createEmptyBar()])
     setDrumViewBar(drumPages.length)
   }
 
-  const removeDrumBar = () => {
+  const removeDrumBar = async () => {
     if (drumPages.length <= 1) return
     const last = drumPages[drumPages.length - 1]
     if (barHasContent(last)) {
-      if (!window.confirm('Remove last drum bar?')) return
+      if (!(await confirmAction('Remove last drum bar?'))) return
     }
     setDrumPages((prev) => prev.slice(0, -1))
     setDrumViewBar((v) => Math.min(v, drumPages.length - 2))
   }
 
-  const clearDrumBar = () => {
+  const clearDrumBar = async () => {
     const bar = drumPages[drumViewBar]
     if (!bar || !barHasContent(bar)) return
-    if (!window.confirm(`Clear drum bar ${drumViewBar + 1}?`)) return
+    if (!(await confirmAction(`Clear drum bar ${drumViewBar + 1}?`))) return
     setDrumPages((prev) => {
       const next = clonePages(prev)
       next[drumViewBar] = createEmptyBar()
@@ -467,36 +469,36 @@ export default function BeatMaker() {
     })
   }
 
-  const clearAllDrums = () => {
+  const clearAllDrums = async () => {
     if (!pagesHaveContent(drumPages)) return
-    if (!window.confirm('Clear all drum bars?')) return
+    if (!(await confirmAction('Clear all drum bars?', { danger: true }))) return
     setDrumPages(createDefaultPages())
     setDrumViewBar(0)
   }
 
-  const addMelodyBar = () => {
+  const addMelodyBar = async () => {
     if (melodyPages.length >= MAX_BARS) {
-      window.alert(`Max ${MAX_BARS} bars.`)
+      await alertUser(`Max ${MAX_BARS} bars.`)
       return
     }
     setMelodyPages((prev) => [...prev, createEmptyMelodyBar()])
     setMelodyViewBar(melodyPages.length)
   }
 
-  const removeMelodyBar = () => {
+  const removeMelodyBar = async () => {
     if (melodyPages.length <= 1) return
     const last = melodyPages[melodyPages.length - 1]
     if (melodyBarHasContent(last)) {
-      if (!window.confirm('Remove last melody bar?')) return
+      if (!(await confirmAction('Remove last melody bar?'))) return
     }
     setMelodyPages((prev) => prev.slice(0, -1))
     setMelodyViewBar((v) => Math.min(v, melodyPages.length - 2))
   }
 
-  const clearMelodyBar = () => {
+  const clearMelodyBar = async () => {
     const bar = melodyPages[melodyViewBar]
     if (!bar || !melodyBarHasContent(bar)) return
-    if (!window.confirm(`Clear melody bar ${melodyViewBar + 1}?`)) return
+    if (!(await confirmAction(`Clear melody bar ${melodyViewBar + 1}?`))) return
     setMelodyPages((prev) => {
       const next = cloneMelodyPages(prev)
       next[melodyViewBar] = createEmptyMelodyBar()
@@ -504,9 +506,9 @@ export default function BeatMaker() {
     })
   }
 
-  const clearAllMelody = () => {
+  const clearAllMelody = async () => {
     if (!melodyPagesHaveContent(melodyPages)) return
-    if (!window.confirm('Clear all melody bars?')) return
+    if (!(await confirmAction('Clear all melody bars?', { danger: true }))) return
     setMelodyPages(createDefaultMelodyPages())
     setMelodyViewBar(0)
   }

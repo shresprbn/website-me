@@ -17,6 +17,7 @@ import {
   cellFromPointer,
 } from '../lib/pixelUtils'
 import SaveToGallery from '../components/SaveToGallery'
+import { useModal } from '../components/ModalProvider'
 
 const TOOLS = [
   { id: 'pencil', label: 'pencil', icon: '✎' },
@@ -81,6 +82,7 @@ function nextLayerName(layers) {
 }
 
 export default function PixelMaker() {
+  const { confirmAction, alertUser } = useModal()
   const initial = createDefaultLayers(32)
 
   const canvasRef = useRef(null)
@@ -194,7 +196,7 @@ export default function PixelMaker() {
     }
   }, [])
 
-  const handlePointerDown = (e) => {
+  const handlePointerDown = async (e) => {
     e.preventDefault()
     const canvas = canvasRef.current
     if (!canvas) return
@@ -226,7 +228,7 @@ export default function PixelMaker() {
         setActiveColor(picked)
         setPickerColor(picked)
         if (!currentPalette.includes(picked)) {
-          const add = window.confirm('Add this color to your palette?')
+          const add = await confirmAction('Add this color to your palette?')
           if (add && currentPalette.length < MAX_PALETTE) {
             setPalette((p) => [...p, picked])
           }
@@ -240,10 +242,10 @@ export default function PixelMaker() {
     applyCell(cell.x, cell.y)
   }
 
-  const changeGridSize = (size) => {
+  const changeGridSize = async (size) => {
     if (size === gridSize) return
     if (hasContentInLayers(layers)) {
-      const ok = window.confirm('Changing grid size will clear your art. Continue?')
+      const ok = await confirmAction('Changing grid size will clear your art. Continue?', { danger: true })
       if (!ok) return
     }
     const next = createDefaultLayers(size)
@@ -252,25 +254,25 @@ export default function PixelMaker() {
     setActiveLayerId(next.activeLayerId)
   }
 
-  const clearLayer = () => {
+  const clearLayer = async () => {
     if (!activeLayer || !hasContent(activeLayer.pixels)) return
-    const ok = window.confirm(`Clear ${activeLayer.name}?`)
+    const ok = await confirmAction(`Clear ${activeLayer.name}?`, { danger: true })
     if (!ok) return
     updateActiveLayerPixels(() => createEmptyGrid(gridSize))
   }
 
-  const clearAll = () => {
+  const clearAll = async () => {
     if (!hasContentInLayers(layers)) return
-    const ok = window.confirm('Clear all layers?')
+    const ok = await confirmAction('Clear all layers?', { danger: true })
     if (!ok) return
     const next = createDefaultLayers(gridSize)
     setLayers(next.layers)
     setActiveLayerId(next.activeLayerId)
   }
 
-  const addLayer = () => {
+  const addLayer = async () => {
     if (layers.length >= MAX_LAYERS) {
-      window.alert(`Max ${MAX_LAYERS} layers.`)
+      await alertUser(`Max ${MAX_LAYERS} layers.`)
       return
     }
     const layer = createLayer(gridSize, nextLayerName(layers))
@@ -278,12 +280,12 @@ export default function PixelMaker() {
     setActiveLayerId(layer.id)
   }
 
-  const deleteLayer = (id) => {
+  const deleteLayer = async (id) => {
     if (layers.length <= 1) return
     const layer = layers.find((l) => l.id === id)
     if (!layer) return
     if (hasContent(layer.pixels)) {
-      const ok = window.confirm(`Delete ${layer.name}?`)
+      const ok = await confirmAction(`Delete ${layer.name}?`, { danger: true })
       if (!ok) return
     }
     const idx = layers.findIndex((l) => l.id === id)
@@ -319,14 +321,14 @@ export default function PixelMaker() {
     )
   }
 
-  const addToPalette = () => {
+  const addToPalette = async () => {
     const normalized = pickerColor.toLowerCase()
     if (palette.includes(normalized)) {
       setActiveColor(normalized)
       return
     }
     if (palette.length >= MAX_PALETTE) {
-      window.alert(`Palette is full (max ${MAX_PALETTE} colors).`)
+      await alertUser(`Palette is full (max ${MAX_PALETTE} colors).`)
       return
     }
     setPalette((p) => [...p, normalized])
