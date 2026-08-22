@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import Playground from './pages/Playground'
 import BounceLab from './pages/BounceLab'
 import PixelMaker from './pages/PixelMaker'
+import FontMaker from './pages/FontMaker'
 import Gallery from './pages/Gallery'
 import CreationDetail from './pages/CreationDetail'
 import BeatMaker from './pages/BeatMaker'
@@ -14,6 +15,8 @@ import GiftMaker from './pages/GiftMaker'
 import GiftView from './pages/GiftView'
 import StickyNotes from './pages/StickyNotes'
 import GarbageRun from './pages/GarbageRun'
+import PomodoroLanding from './pages/PomodoroLanding'
+import PomodoroTimer from './pages/PomodoroTimer'
 import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
@@ -25,6 +28,7 @@ export default function App() {
         <Route path="/playground" element={<Playground />} />
         <Route path="/bounce-lab" element={<BounceLab />} />
         <Route path="/pixel-maker" element={<PixelMaker />} />
+        <Route path="/font-maker" element={<FontMaker />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/gallery/:id" element={<CreationDetail />} />
         <Route path="/beat-maker" element={<BeatMaker />} />
@@ -36,6 +40,8 @@ export default function App() {
         <Route path="/gift/:id" element={<GiftView />} />
         <Route path="/notes-wall" element={<StickyNotes />} />
         <Route path="/garbage-run" element={<GarbageRun />} />
+        <Route path="/pomodoro" element={<PomodoroLanding />} />
+        <Route path="/pomodoro/:roomId" element={<PomodoroTimer />} />
       </Routes>
     </BrowserRouter>
   )

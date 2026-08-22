@@ -1089,6 +1089,174 @@ a { color: inherit; }
   box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
 }
 
+/* ── Font maker ──────────────────────────────────────────── */
+.font-maker-name-input {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  border: 1px solid #e0dbd0;
+  border-radius: 40px;
+  padding: 9px 18px;
+  background: #fff;
+  color: #141414;
+  min-width: 160px;
+}
+.font-maker-progress {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: #aaa;
+  margin-bottom: 10px;
+}
+.font-maker-tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.font-maker-canvas-stack { position: relative; }
+.font-maker-guide-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+.font-maker-draw-canvas {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+/* Sheet — a grid of small, individually-drawable canvases so you don't
+   have to pick a letter, then hop to a separate big canvas, over and over. */
+.font-maker-sheet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #e8e3d8;
+}
+.font-maker-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.font-maker-mini-stack {
+  position: relative;
+  background:
+    linear-gradient(45deg, #ece8df 25%, transparent 25%),
+    linear-gradient(-45deg, #ece8df 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ece8df 75%),
+    linear-gradient(-45deg, transparent 75%, #ece8df 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  background-color: #f5f2eb;
+  border: 1px solid #e8e3d8;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+}
+.font-maker-mini-stack.active { border: 2px solid #ff6b9d; }
+.font-maker-mini-guide {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+.font-maker-mini-draw {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: transparent;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  touch-action: none;
+  cursor: crosshair;
+}
+.font-maker-mini-dot {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ecdc4;
+  box-shadow: 0 0 0 2px #fff;
+  pointer-events: none;
+}
+.font-maker-mini-expand {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .8);
+  color: #8a8a8a;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+}
+.font-maker-mini-expand:hover { color: #141414; background: #fff; }
+.font-maker-mini-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #8a8a8a;
+}
+
+.font-maker-zoom-modal {
+  max-width: 480px;
+  width: auto;
+}
+.font-maker-zoom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.font-maker-zoom-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+}
+.font-maker-zoom-modal .pixel-maker-stage {
+  min-height: 0;
+  background: transparent;
+  border: none;
+}
+
+.font-maker-preview {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #e8e3d8;
+}
+.font-maker-preview-canvas-wrap {
+  margin-top: 14px;
+  overflow-x: auto;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e8e3d8;
+  border-radius: 10px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+.font-maker-preview-canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+@media (max-width: 640px) {
+  .font-maker-char-btn { width: 30px; height: 30px; font-size: 12px; }
+}
+
 @media (min-width: 901px) {
   .pixel-maker-sidebar .playground-panel-toggle { display: none; }
   .pixel-maker-sidebar {
@@ -2461,4 +2629,199 @@ a { color: inherit; }
   .garbage-run-layout { flex-direction: column; align-items: stretch; }
   .garbage-run-crash-panel, .garbage-run-leaderboard { max-width: none; }
   .garbage-run-leaderboard { position: static; }
+}
+
+/* ── Pomodoro ────────────────────────────────────────────── */
+.pomodoro-page { padding: 56px 24px 100px; max-width: 980px; margin: 0 auto; }
+
+.pomodoro-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.pomodoro-main-col {
+  flex: 1 1 auto;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pomodoro-side-col {
+  flex: 0 1 260px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Ring */
+.pomodoro-ring-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 24px; }
+.pomodoro-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.pomodoro-ring-track { fill: none; stroke: #eee7d8; stroke-width: 10; }
+.pomodoro-ring-progress {
+  fill: none;
+  stroke: #ff6b9d;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+.pomodoro-ring--break .pomodoro-ring-progress { stroke: #4ecdc4; }
+.pomodoro-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.pomodoro-phase-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+.pomodoro-time {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: 40px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pomodoro-cycles { font-family: 'Space Mono', monospace; font-size: 11px; color: #aaa; margin-top: 6px; }
+
+/* Controls */
+.pomodoro-controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 8px; }
+.pomodoro-hint { font-family: 'Space Mono', monospace; font-size: 11px; color: #aaa; margin: 12px 0 0; }
+
+/* Preset bubble clusters */
+.pomodoro-preset-groups {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 36px;
+}
+.pomodoro-preset-group { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.pomodoro-preset-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: #aaa;
+}
+.pomodoro-bubbles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  min-height: 150px;
+}
+.pomodoro-bubble-wrap { position: relative; display: inline-flex; }
+.pomodoro-bubble {
+  border-radius: 50%;
+  border: 2px solid #e8e3d8;
+  background: #fff;
+  color: #141414;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease, color .15s ease;
+}
+.pomodoro-bubble:hover:not(:disabled) { transform: scale(1.05); }
+.pomodoro-bubble:disabled { cursor: not-allowed; opacity: .55; }
+.pomodoro-bubble.selected { background: #ff6b9d; border-color: #ff6b9d; color: #3d0d22; }
+.pomodoro-bubble--break.selected { background: #4ecdc4; border-color: #4ecdc4; color: #063a34; }
+.pomodoro-bubble-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: #141414;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pomodoro-add-form { margin-top: 2px; }
+.pomodoro-add-input {
+  width: 118px;
+  border: 1.5px dashed #d8d2c2;
+  border-radius: 30px;
+  background: transparent;
+  padding: 8px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  text-align: center;
+  color: #8a8a8a;
+}
+.pomodoro-add-input:focus { outline: none; border-color: #ff6b9d; color: #141414; }
+
+/* Side panels — share link, presence */
+.pomodoro-panel {
+  background: #fff;
+  border: 1px solid #e8e3d8;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pomodoro-share-btn {
+  align-self: flex-start;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 18px;
+  background: #141414;
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform .15s ease;
+}
+.pomodoro-share-btn:hover { transform: translateY(-2px); }
+.pomodoro-members { display: flex; flex-wrap: wrap; gap: 8px; }
+.pomodoro-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #e8e3d8;
+}
+.pomodoro-rename-link {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.pomodoro-rename-link:hover { color: #141414; }
+
+@media (max-width: 720px) {
+  .pomodoro-page { padding: 40px 20px 80px; }
+  .pomodoro-layout { flex-direction: column; align-items: stretch; }
+  .pomodoro-side-col { flex: 1 1 auto; }
+  .pomodoro-preset-groups { gap: 28px; }
 }

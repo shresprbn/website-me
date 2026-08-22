@@ -17,6 +17,13 @@ const ITEMS = [
     blurb: 'Paint tiny things — a small grid editor.',
   },
   {
+    to: '/font-maker',
+    glyph: 'Aa',
+    color: '#5b8def',
+    title: 'Font Maker',
+    blurb: 'Draw a pixel font, letter by letter, export a real .ttf.',
+  },
+  {
     to: '/beat-maker',
     glyph: '♪',
     color: '#ffb800',
@@ -78,6 +85,13 @@ const ITEMS = [
     color: '#f2b705',
     title: 'Garbage Run',
     blurb: 'Snake, but it\'s a garbage truck eating bananas.',
+  },
+  {
+    to: '/pomodoro',
+    glyph: '⏱',
+    color: '#ff6b9d',
+    title: 'Pomodoro',
+    blurb: 'A shared timer — share the link, everyone sees the same clock.',
   },
 ]
 
