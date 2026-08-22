@@ -413,9 +413,12 @@ export default function PomodoroTimer() {
                     max="300"
                     value={newWorkInput}
                     onChange={(e) => setNewWorkInput(e.target.value)}
-                    placeholder="+ add minutes"
+                    placeholder="min"
                     className="pomodoro-add-input"
                   />
+                  <button type="submit" className="pomodoro-add-btn" aria-label="Add work preset">
+                    +
+                  </button>
                 </form>
               </div>
 
@@ -463,9 +466,12 @@ export default function PomodoroTimer() {
                     max="300"
                     value={newBreakInput}
                     onChange={(e) => setNewBreakInput(e.target.value)}
-                    placeholder="+ add minutes"
+                    placeholder="min"
                     className="pomodoro-add-input"
                   />
+                  <button type="submit" className="pomodoro-add-btn" aria-label="Add break preset">
+                    +
+                  </button>
                 </form>
               </div>
             </div>
