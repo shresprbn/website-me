@@ -15,6 +15,20 @@ export const PLAYGROUND_ITEMS = [
     blurb: "Conway's cells — draw a seed, run it, watch it evolve.",
   },
   {
+    to: '/powder-toy',
+    glyph: '⋰',
+    color: '#f2b705',
+    title: 'Powder Toy',
+    blurb: 'Falling sand — sand, water, fire, plants, all at once.',
+  },
+  {
+    to: '/reaction-diffusion',
+    glyph: '❋',
+    color: '#7c6cf0',
+    title: 'Reaction–Diffusion',
+    blurb: 'Two chemicals, a few numbers, endless organic patterns.',
+  },
+  {
     to: '/pixel-maker',
     glyph: '✎',
     color: '#4ecdc4',
