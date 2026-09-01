@@ -857,6 +857,12 @@ a { color: inherit; }
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .playground-hub-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
+.playground-hub-card--more {
+  background: transparent;
+  border-style: dashed;
+  border-color: #d8d2c4;
+}
+.playground-hub-card--more .playground-hub-glyph { letter-spacing: .12em; }
 .playground-hub-glyph { font-size: 26px; line-height: 1; }
 .playground-hub-title { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 18px; }
 .playground-hub-blurb { font-size: 13px; color: #8a8a8a; line-height: 1.4; }

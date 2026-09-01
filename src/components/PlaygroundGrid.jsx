@@ -33,6 +33,16 @@ export default function PlaygroundGrid() {
             <span className="playground-hub-blurb">{item.blurb}</span>
           </Link>
         ))}
+
+        <Link to="/playground" className="playground-hub-card playground-hub-card--more">
+          <span className="playground-hub-glyph" style={{ color: '#8a8a8a' }}>
+            …
+          </span>
+          <span className="playground-hub-title">
+            {PLAYGROUND_ITEMS.length - FEATURED.length} more
+          </span>
+          <span className="playground-hub-blurb">see the whole pile →</span>
+        </Link>
       </div>
     </section>
   )
