@@ -42,17 +42,70 @@ export default function PowderToy() {
   const brushRef = useRef(brush)
   const paintingRef = useRef(false)
   const frameRef = useRef(0)
+  // Firework sparks live off-grid as ballistic particles, drawn over the sim.
+  const sparksRef = useRef([])
 
   runningRef.current = running
   speedRef.current = speed
   brushRef.current = brush
   matRef.current = MATERIAL_LIST.find((m) => m.id === material)?.mat ?? SAND
 
+  const spawnBurst = (gx, gy) => {
+    const sparks = sparksRef.current
+    const count = 16 + ((Math.random() * 16) | 0)
+    const baseHue = Math.random() < 0.4 ? 45 : (Math.random() * 360) | 0
+    for (let i = 0; i < count; i++) {
+      const ang = Math.random() * Math.PI * 2
+      const spd = 0.7 + Math.random() * 2.6
+      sparks.push({
+        x: gx,
+        y: gy,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd - 0.6,
+        life: 16 + ((Math.random() * 20) | 0),
+        maxLife: 36,
+        hue: (baseHue + (Math.random() * 50 - 25) + 360) % 360,
+      })
+    }
+    if (sparks.length > 1600) sparks.splice(0, sparks.length - 1600)
+  }
+
+  const updateSparks = () => {
+    const world = worldRef.current
+    const sparks = sparksRef.current
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i]
+      s.x += s.vx
+      s.y += s.vy
+      s.vy += 0.09 // gravity
+      s.vx *= 0.985
+      s.life--
+      const gx = s.x | 0
+      const gy = s.y | 0
+      const off = s.life <= 0 || gx < 0 || gy < 0 || gx >= cols || gy >= rows
+      // die on contact with anything solid-ish
+      const hit =
+        !off && world && world.mat[gy * cols + gx] !== 0 && world.mat[gy * cols + gx] !== 6
+      if (off || hit) sparks.splice(i, 1)
+    }
+  }
+
   const render = () => {
     const canvas = canvasRef.current
     if (!canvas || !worldRef.current || !imageRef.current) return
     renderWorld(worldRef.current, imageRef.current)
-    canvas.getContext('2d').putImageData(imageRef.current, 0, 0)
+    const ctx = canvas.getContext('2d')
+    ctx.putImageData(imageRef.current, 0, 0)
+    const sparks = sparksRef.current
+    for (let i = 0; i < sparks.length; i++) {
+      const s = sparks[i]
+      const a = Math.max(0, s.life / s.maxLife)
+      ctx.fillStyle = `hsla(${s.hue}, 100%, ${55 + a * 25}%, ${a})`
+      ctx.fillRect(s.x, s.y, 1, 1)
+      // a one-cell tail
+      ctx.fillStyle = `hsla(${s.hue}, 100%, 60%, ${a * 0.4})`
+      ctx.fillRect(s.x - s.vx * 0.6, s.y - s.vy * 0.6, 1, 1)
+    }
   }
 
   useEffect(() => {
@@ -64,14 +117,17 @@ export default function PowderToy() {
 
     let raf
     const loop = () => {
-      if (worldRef.current) {
+      const world = worldRef.current
+      if (world) {
         if (runningRef.current) {
           const iters = Math.max(1, Math.round(speedRef.current))
           for (let i = 0; i < iters; i++) {
-            stepWorld(worldRef.current, frameRef.current++)
+            stepWorld(world, frameRef.current++)
           }
+          for (const e of world.explosions) spawnBurst(e.x, e.y)
+          world.explosions.length = 0
+          updateSparks()
         }
-        // keep a held brush pouring even while the sim is paused
         render()
       }
       raf = requestAnimationFrame(loop)
@@ -171,10 +227,11 @@ export default function PowderToy() {
         </Link>
         <div className="playground-header">
           <div className="playground-eyebrow">// POWDER TOY</div>
-          <h1 className="playground-title">Sand falls. Water flows. Fire spreads. Plants drink.</h1>
+          <h1 className="playground-title">Sand falls. Water flows. Fire spreads. Powder goes bang.</h1>
           <p className="playground-lede">
             A falling-sand sandbox. Pick a material, drag it in, watch it settle. Fire eats plants,
-            water puts it out and makes steam, plants creep along anything wet.
+            water puts it out and steams, plants creep along anything wet — and a spark in the
+            gunpowder sets off fireworks. Lay a powder trail and light one end.
           </p>
         </div>
 

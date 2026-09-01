@@ -19,7 +19,7 @@ export const PLAYGROUND_ITEMS = [
     glyph: '⋰',
     color: '#f2b705',
     title: 'Powder Toy',
-    blurb: 'Falling sand — sand, water, fire, plants, all at once.',
+    blurb: 'Falling sand — water, fire, plants, and gunpowder fireworks.',
   },
   {
     to: '/reaction-diffusion',
