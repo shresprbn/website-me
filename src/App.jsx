@@ -18,6 +18,7 @@ import GarbageRun from './pages/GarbageRun'
 import WordZap from './pages/WordZap'
 import PomodoroLanding from './pages/PomodoroLanding'
 import PomodoroTimer from './pages/PomodoroTimer'
+import GameOfLife from './pages/GameOfLife'
 import ScrollToTop from './components/ScrollToTop'
 import { ModalProvider } from './components/ModalProvider'
 
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/word-zap" element={<WordZap />} />
           <Route path="/pomodoro" element={<PomodoroLanding />} />
           <Route path="/pomodoro/:roomId" element={<PomodoroTimer />} />
+          <Route path="/game-of-life" element={<GameOfLife />} />
         </Routes>
       </ModalProvider>
     </BrowserRouter>

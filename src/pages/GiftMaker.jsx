@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
 import { GIFT_THEMES, GIFTS_ENABLED, parseSpotifyUrl, parseYoutubeUrl, saveGift } from '../lib/gifts'
 import { useModal } from '../components/ModalProvider'
@@ -315,7 +314,9 @@ export default function GiftMaker() {
               </button>
             </div>
             <div className="gift-share-links">
-              <Link to={`/gift/${saved.id}`}>preview it →</Link>
+              <a href={`/gift/${saved.id}`} target="_blank" rel="noopener noreferrer">
+                open it ↗
+              </a>
               <button
                 type="button"
                 className="gift-share-reset"

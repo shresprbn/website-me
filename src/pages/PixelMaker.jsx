@@ -27,7 +27,7 @@ const TOOLS = [
   { id: 'pencil', label: 'pencil', icon: '✎', key: 'B' },
   { id: 'eraser', label: 'eraser', icon: '⌫', key: 'E' },
   { id: 'fill', label: 'fill', icon: '▣', key: 'G' },
-  { id: 'eyedropper', label: 'eyedropper', icon: '◉', key: 'I' },
+  { id: 'eyedropper', label: 'eyedrop', icon: '◉', key: 'I' },
   { id: 'line', label: 'line', icon: '╱', key: 'L' },
   { id: 'rect', label: 'rect', icon: '▭', key: 'R' },
   { id: 'ellipse', label: 'ellipse', icon: '◯', key: 'O' },
@@ -748,12 +748,6 @@ export default function PixelMaker() {
                     ◍ onion
                   </button>
                 </div>
-
-                <div className="pixel-maker-hint">
-                  B pencil · E eraser · G fill · I eyedropper · L/R/O line/rect/ellipse
-                  <br />
-                  Ctrl+Z undo · +/− zoom · hold Space to pan
-                </div>
               </div>
 
               <div className="pixel-maker-panel">
@@ -952,6 +946,12 @@ export default function PixelMaker() {
                     )
                   })}
                 </div>
+              </div>
+
+              <div className="pixel-maker-hint">
+                B pencil · E eraser · G fill · I eyedrop · L/R/O line/rect/ellipse
+                <br />
+                Ctrl+Z undo · +/− zoom · hold Space to pan
               </div>
             </div>
           </aside>

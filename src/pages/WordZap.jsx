@@ -250,8 +250,11 @@ export default function WordZap() {
     })
   }
 
-  const missWord = (word) => {
-    if (lockedWordIdRef.current === word.id) {
+  // A cluster of words reaching the floor in the same frame costs one life,
+  // not one each — losing the run to a pile-up feels cheap.
+  const loseLife = (missedWords) => {
+    const lockedId = lockedWordIdRef.current
+    if (lockedId && missedWords.some((w) => w.id === lockedId)) {
       lockedWordIdRef.current = null
       setLockedWordId(null)
     }
@@ -299,8 +302,17 @@ export default function WordZap() {
         })
         if (missed.length) {
           const missedIds = new Set(missed.map((w) => w.id))
-          wordsRef.current = wordsRef.current.filter((w) => !missedIds.has(w.id))
-          missed.forEach(missWord)
+          // Shove the survivors back up the board so the next word in a
+          // stack isn't already at the floor — one miss shouldn't chain
+          // into losing every life at once.
+          const reprieve = Math.min(180, floorY * 0.42)
+          wordsRef.current = wordsRef.current
+            .filter((w) => !missedIds.has(w.id))
+            .map((w) => {
+              w.y = Math.max(-24, w.y - reprieve)
+              return w
+            })
+          loseLife(missed)
         }
         setWords([...wordsRef.current])
       }

@@ -1,6 +1,7 @@
 import Nav from '../components/Nav'
 import LetterIntro from '../components/LetterIntro'
 import WritingGrid from '../components/WritingGrid'
+import PlaygroundGrid from '../components/PlaygroundGrid'
 import About from '../components/About'
 import FunFact from '../components/FunFact'
 import Languages from '../components/Languages'
@@ -18,6 +19,10 @@ export default function Home() {
 
       <div className="container">
         <WritingGrid />
+      </div>
+
+      <div className="container">
+        <PlaygroundGrid />
       </div>
 
       <About />

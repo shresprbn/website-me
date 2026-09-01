@@ -999,7 +999,7 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1 1 calc(50% - 4px);
+  flex: 1 1 100%;
   min-width: 0;
   padding: 9px 10px;
   border: 2px solid transparent;
@@ -1015,7 +1015,7 @@ a { color: inherit; }
   border-color: #ff6b9d;
   background: rgba(255, 107, 157, .08);
 }
-.pixel-maker-tool-icon { font-size: 14px; width: 18px; text-align: center; }
+.pixel-maker-tool-icon { font-size: 14px; width: 16px; flex: none; text-align: center; }
 .pixel-maker-layers {
   display: flex;
   flex-direction: column;
@@ -3286,4 +3286,48 @@ a { color: inherit; }
   .pomodoro-layout { flex-direction: column; align-items: stretch; }
   .pomodoro-side-col { flex: 1 1 auto; position: static; }
   .pomodoro-preset-groups { gap: 28px; }
+}
+
+/* ── Game of Life ────────────────────────────────────────── */
+.life-hud { display: flex; align-items: center; gap: 22px; margin-bottom: 16px; }
+.life-stat { font-family: 'Space Mono', monospace; font-size: 14px; color: #8a8a8a; }
+.life-stat strong { color: #141414; font-size: 16px; font-variant-numeric: tabular-nums; }
+.life-controls { align-items: center; }
+.life-seg { display: inline-flex; gap: 4px; }
+.life-stage {
+  background: #faf8f3;
+  border: 1px solid #e8e3d8;
+  border-radius: 12px;
+  padding: 18px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+}
+.life-canvas {
+  display: block;
+  border-radius: 4px;
+  cursor: crosshair;
+  touch-action: none;
+  /* ring via shadow, not border, so the element's box matches the drawing
+     surface exactly and pointer→cell math stays honest */
+  box-shadow: 0 0 0 1px #e8e3d8, 0 4px 20px rgba(0, 0, 0, .06);
+}
+.life-patterns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.life-patterns-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: #aaa;
+  margin-right: 4px;
+}
+
+@media (max-width: 640px) {
+  .life-stage { padding: 10px; }
+  .life-hud { gap: 16px; }
 }

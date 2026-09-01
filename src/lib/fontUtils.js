@@ -182,6 +182,10 @@ export function drawGuideToCanvas(canvas, char, gridSize, displayScale, opts = {
   const size = gridSize * displayScale
   canvas.width = size * GUIDE_DPR
   canvas.height = size * GUIDE_DPR
+  // Pin the CSS box to the logical size — without this the canvas lays out at
+  // its (DPR-scaled) intrinsic width and overhangs the pixel grid it sits over.
+  canvas.style.width = `${size}px`
+  canvas.style.height = `${size}px`
   const ctx = canvas.getContext('2d')
   if (!ctx) return
   ctx.setTransform(GUIDE_DPR, 0, 0, GUIDE_DPR, 0, 0)
