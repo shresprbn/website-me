@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
 import { GIFT_THEMES, GIFTS_ENABLED, parseSpotifyUrl, parseYoutubeUrl, saveGift } from '../lib/gifts'
@@ -17,6 +17,54 @@ const STICKER_PALETTE = [
 
 let uid = 0
 const nextId = () => `g${Date.now()}-${uid++}`
+
+// ── Draft persistence — local to the device, no server, no table ──────
+// The whole in-progress gift is mirrored to localStorage so a refresh or an
+// accidental tab-close before "wrap it up" doesn't throw the work away.
+const DRAFT_KEY = 'gift-maker-draft'
+const EMPTY_DRAFT = {
+  title: '', toName: '', fromName: '', theme: 'kraft',
+  noteDraft: '', notes: [],
+  songTitle: '', songArtist: '', songUrl: '', songs: [],
+  linkUrl: '', linkTitle: '', links: [],
+  stickers: [],
+}
+
+function loadDraft() {
+  if (typeof localStorage === 'undefined') return EMPTY_DRAFT
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY)
+    if (!raw) return EMPTY_DRAFT
+    const d = JSON.parse(raw) || {}
+    return {
+      ...EMPTY_DRAFT,
+      ...d,
+      theme: GIFT_THEMES.some((t) => t.id === d.theme) ? d.theme : 'kraft',
+      notes: Array.isArray(d.notes) ? d.notes : [],
+      songs: Array.isArray(d.songs) ? d.songs : [],
+      links: Array.isArray(d.links) ? d.links : [],
+      stickers: Array.isArray(d.stickers) ? d.stickers : [],
+    }
+  } catch {
+    return EMPTY_DRAFT
+  }
+}
+
+function saveDraft(draft) {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
+  } catch {
+    // private mode / quota — draft-saving is a nicety, never block on it
+  }
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY)
+  } catch {
+    // ignore
+  }
+}
 
 const fieldStyle = {
   fontFamily: "'Space Mono', monospace",
@@ -55,24 +103,26 @@ function SectionLabel({ children, count, max }) {
 
 export default function GiftMaker() {
   const { alertUser, copyLink: copyLinkModal } = useModal()
-  const [title, setTitle] = useState('')
-  const [toName, setToName] = useState('')
-  const [fromName, setFromName] = useState('')
-  const [theme, setTheme] = useState('kraft')
+  const draft0 = useRef(loadDraft()).current
 
-  const [noteDraft, setNoteDraft] = useState('')
-  const [notes, setNotes] = useState([])
+  const [title, setTitle] = useState(draft0.title)
+  const [toName, setToName] = useState(draft0.toName)
+  const [fromName, setFromName] = useState(draft0.fromName)
+  const [theme, setTheme] = useState(draft0.theme)
 
-  const [songTitle, setSongTitle] = useState('')
-  const [songArtist, setSongArtist] = useState('')
-  const [songUrl, setSongUrl] = useState('')
-  const [songs, setSongs] = useState([])
+  const [noteDraft, setNoteDraft] = useState(draft0.noteDraft)
+  const [notes, setNotes] = useState(draft0.notes)
 
-  const [linkUrl, setLinkUrl] = useState('')
-  const [linkTitle, setLinkTitle] = useState('')
-  const [links, setLinks] = useState([])
+  const [songTitle, setSongTitle] = useState(draft0.songTitle)
+  const [songArtist, setSongArtist] = useState(draft0.songArtist)
+  const [songUrl, setSongUrl] = useState(draft0.songUrl)
+  const [songs, setSongs] = useState(draft0.songs)
 
-  const [stickers, setStickers] = useState([])
+  const [linkUrl, setLinkUrl] = useState(draft0.linkUrl)
+  const [linkTitle, setLinkTitle] = useState(draft0.linkTitle)
+  const [links, setLinks] = useState(draft0.links)
+
+  const [stickers, setStickers] = useState(draft0.stickers)
   const boardRef = useRef(null)
   const dragRef = useRef(null)
 
@@ -82,6 +132,23 @@ export default function GiftMaker() {
   const [copied, setCopied] = useState(false)
 
   const activeTheme = GIFT_THEMES.find((t) => t.id === theme) || GIFT_THEMES[0]
+
+  // Mirror the in-progress gift to localStorage on every change.
+  useEffect(() => {
+    saveDraft({
+      title, toName, fromName, theme,
+      noteDraft, notes,
+      songTitle, songArtist, songUrl, songs,
+      linkUrl, linkTitle, links,
+      stickers,
+    })
+  }, [
+    title, toName, fromName, theme,
+    noteDraft, notes,
+    songTitle, songArtist, songUrl, songs,
+    linkUrl, linkTitle, links,
+    stickers,
+  ])
 
   const addNote = () => {
     const trimmed = noteDraft.trim()
@@ -188,6 +255,9 @@ export default function GiftMaker() {
         stickers: stickers.map(({ emoji, x, y, rot, scale }) => ({ emoji, x, y, rot, scale })),
       })
       setSaved(result)
+      // It's wrapped and lives on a shareable link now — the local draft has
+      // done its job.
+      clearDraft()
     } catch (err) {
       setError(err.message || 'Could not save — try again.')
     } finally {
@@ -480,6 +550,9 @@ export default function GiftMaker() {
               <button type="button" className="btn-pill pink" style={{ border: 'none', padding: '13px 28px', fontSize: 14 }} onClick={wrapItUp} disabled={saving}>
                 {saving ? 'wrapping…' : 'wrap it up →'}
               </button>
+              {hasAnything ? (
+                <p className="gift-draft-note">kept as a draft on this device — a refresh won&apos;t lose it</p>
+              ) : null}
             </div>
           </>
         )}

@@ -4,40 +4,61 @@ import { useWindowWidth } from '../hooks/useWindowWidth'
 import { SPRITES } from '../lib/snakeSprites'
 import {
   GRID_COLS,
+  GRID_ROWS,
   DIRS,
   OPPOSITE,
-  TICK_START_MS,
-  TICK_MIN_MS,
-  TICK_STEP_MS,
   SCORE_PER_FOOD,
   createInitialSnake,
   segmentSpriteKey,
   randomEmptyCell,
   isOutOfBounds,
 } from '../lib/snakeUtils'
-import { LEADERBOARD_ENABLED, SCORES_ENABLED, fetchTopScores, startSession, submitScore } from '../lib/garbageRun'
+import { LEADERBOARD_ENABLED, SCORES_ENABLED, fetchRank, fetchTopScores, startSession, submitScore } from '../lib/garbageRun'
 import { DINO_WALK_FRAMES, DINO_IDLE_FRAMES, DINO_PASSPHRASE } from '../lib/dinoSprites'
+import Leaderboard from '../components/Leaderboard'
+import SaveScoreModal from '../components/SaveScoreModal'
 
 const BEST_KEY = 'garbage-run-best-score'
 const NAME_KEY = 'garbage-run-player-name'
+const MUTE_KEY = 'garbage-run-muted'
+const DIFF_KEY = 'garbage-run-difficulty'
+const WRAP_KEY = 'garbage-run-wrap'
 const CELL_MAX = 30
 const DINO_WALK_FRAME_MS = 110
 const DINO_SPEED_PX_PER_SEC = 140
 const DINO_SIZE = 100
 const MAX_DINOS = 8
 
+// Difficulty maps to how fast the truck ticks and how hard it ramps.
+const DIFFICULTIES = {
+  chill: { label: 'chill', startMs: 170, minMs: 105, stepMs: 2 },
+  normal: { label: 'normal', startMs: 140, minMs: 70, stepMs: 3 },
+  manic: { label: 'manic', startMs: 108, minMs: 52, stepMs: 4 },
+}
+const DIFFICULTY_IDS = ['chill', 'normal', 'manic']
+const COUNTDOWN_FROM = 3
+
 export default function GarbageRun() {
   const width = useWindowWidth()
   const cellSize = Math.max(14, Math.min(CELL_MAX, Math.floor(Math.min(width - 48, GRID_COLS * CELL_MAX) / GRID_COLS)))
   const boardPx = cellSize * GRID_COLS
+
+  const [difficulty, setDifficulty] = useState(() => {
+    const saved = localStorage.getItem(DIFF_KEY)
+    return DIFFICULTIES[saved] ? saved : 'normal'
+  })
+  const [wrap, setWrap] = useState(() => localStorage.getItem(WRAP_KEY) === '1')
+  const [muted, setMuted] = useState(() => localStorage.getItem(MUTE_KEY) === '1')
 
   const [snake, setSnake] = useState(createInitialSnake)
   const [direction, setDirection] = useState('right')
   const [food, setFood] = useState(null)
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(0)
-  const [status, setStatus] = useState('idle') // idle | playing | over
-  const [tickMs, setTickMs] = useState(TICK_START_MS)
+  const [status, setStatus] = useState('idle') // idle | countdown | playing | paused | over
+  const [countdownN, setCountdownN] = useState(COUNTDOWN_FROM)
+  const [tickMs, setTickMs] = useState(DIFFICULTIES.normal.startMs)
+  const [rank, setRank] = useState(null)
   const [playerName, setPlayerName] = useState(() => localStorage.getItem(NAME_KEY) || '')
   const [leaderboard, setLeaderboard] = useState([])
   const [leaderboardStatus, setLeaderboardStatus] = useState('idle')
@@ -50,7 +71,6 @@ export default function GarbageRun() {
   const [dinos, setDinos] = useState([]) // { id, x, y, duration, moving, facing, frame }
   const [dragLine, setDragLine] = useState(null) // { x1, y1, x2, y2 } while dragging
 
-  const nameInputRef = useRef(null)
   const boardRef = useRef(null)
   const dinosRef = useRef([])
   const nextDinoIdRef = useRef(1)
@@ -65,6 +85,12 @@ export default function GarbageRun() {
   const playerNameRef = useRef(playerName)
   const sessionRef = useRef(null)
   const attemptRef = useRef(0)
+  const wrapRef = useRef(wrap)
+  const mutedRef = useRef(muted)
+  const difficultyRef = useRef(difficulty)
+  const audioCtxRef = useRef(null)
+  const touchStartRef = useRef(null)
+  const countdownTimerRef = useRef(null)
 
   snakeRef.current = snake
   directionRef.current = direction
@@ -73,7 +99,52 @@ export default function GarbageRun() {
   tickMsRef.current = tickMs
   statusRef.current = status
   playerNameRef.current = playerName
+  wrapRef.current = wrap
+  mutedRef.current = muted
+  difficultyRef.current = difficulty
   dinosRef.current = dinos
+
+  // ── Sound ─────────────────────────────────────────────────────────
+  const ensureAudio = () => {
+    if (!audioCtxRef.current) {
+      const Ctx = window.AudioContext || window.webkitAudioContext
+      if (!Ctx) return null
+      audioCtxRef.current = new Ctx()
+    }
+    if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume()
+    return audioCtxRef.current
+  }
+  const blip = (freq, dur = 0.08, type = 'square', when = 0) => {
+    if (mutedRef.current) return
+    const ctx = audioCtxRef.current
+    if (!ctx) return
+    const t = ctx.currentTime + when
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = type
+    osc.frequency.value = freq
+    gain.gain.setValueAtTime(0.0001, t)
+    gain.gain.exponentialRampToValueAtTime(0.16, t + 0.012)
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(t)
+    osc.stop(t + dur + 0.03)
+  }
+  const playPickup = () => {
+    blip(620, 0.07, 'square')
+    blip(930, 0.09, 'square', 0.05)
+  }
+  const playCrash = () => {
+    ;[240, 170, 120].forEach((f, i) => blip(f, 0.2, 'sawtooth', i * 0.06))
+  }
+  const toggleMute = () => {
+    setMuted((m) => {
+      const next = !m
+      localStorage.setItem(MUTE_KEY, next ? '1' : '0')
+      return next
+    })
+  }
 
   useEffect(() => {
     const saved = Number(localStorage.getItem(BEST_KEY) || 0)
@@ -109,20 +180,6 @@ export default function GarbageRun() {
   }
 
   useEffect(() => {
-    if (!saveModalOpen) return
-    const t = setTimeout(() => nameInputRef.current?.focus(), 10)
-    const onKey = (e) => {
-      if (e.key === 'Escape') closeSaveModal()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => {
-      clearTimeout(t)
-      window.removeEventListener('keydown', onKey)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saveModalOpen])
-
-  useEffect(() => {
     if (submitStatus === 'saved') setSaveModalOpen(false)
   }, [submitStatus])
 
@@ -134,8 +191,10 @@ export default function GarbageRun() {
   }, [status])
 
   const endGame = () => {
+    statusRef.current = 'over'
     setStatus('over')
     setSubmitStatus('idle')
+    playCrash()
     setBest((prevBest) => {
       if (scoreRef.current > prevBest) {
         localStorage.setItem(BEST_KEY, String(scoreRef.current))
@@ -143,6 +202,33 @@ export default function GarbageRun() {
       }
       return prevBest
     })
+    setRank(null)
+    if (LEADERBOARD_ENABLED && scoreRef.current > 0) {
+      fetchRank(scoreRef.current).then(setRank).catch(() => {})
+    }
+  }
+
+  const setDifficultyPref = (id) => {
+    if (!DIFFICULTIES[id]) return
+    setDifficulty(id)
+    localStorage.setItem(DIFF_KEY, id)
+  }
+  const toggleWrap = () => {
+    setWrap((w) => {
+      const next = !w
+      localStorage.setItem(WRAP_KEY, next ? '1' : '0')
+      return next
+    })
+  }
+
+  const togglePause = () => {
+    if (statusRef.current === 'playing') {
+      statusRef.current = 'paused'
+      setStatus('paused')
+    } else if (statusRef.current === 'paused') {
+      statusRef.current = 'playing'
+      setStatus('playing')
+    }
   }
 
   // Walks a fresh dino in from off-screen each time the passphrase is typed.
@@ -228,17 +314,45 @@ export default function GarbageRun() {
       .catch(() => setSubmitStatus('error'))
   }
 
+  const runCountdown = () => {
+    clearTimeout(countdownTimerRef.current)
+    let n = COUNTDOWN_FROM
+    setCountdownN(n)
+    blip(440, 0.09, 'sine')
+    const step = () => {
+      n -= 1
+      if (n > 0) {
+        setCountdownN(n)
+        blip(440, 0.09, 'sine')
+        countdownTimerRef.current = setTimeout(step, 650)
+      } else {
+        setCountdownN(0) // shows "GO"
+        blip(880, 0.16, 'sine')
+        countdownTimerRef.current = setTimeout(() => {
+          if (statusRef.current === 'countdown') {
+            statusRef.current = 'playing'
+            setStatus('playing')
+          }
+        }, 420)
+      }
+    }
+    countdownTimerRef.current = setTimeout(step, 650)
+  }
+
   const startGame = (requestedDir = 'right') => {
     setSaveModalOpen(false)
+    clearTimeout(countdownTimerRef.current)
+    ensureAudio()
 
     const initial = createInitialSnake()
     const initialDir = requestedDir === OPPOSITE.right ? 'right' : requestedDir
+    const startMs = DIFFICULTIES[difficultyRef.current].startMs
 
     snakeRef.current = initial
     directionRef.current = initialDir
     nextDirectionRef.current = initialDir
     scoreRef.current = 0
-    tickMsRef.current = TICK_START_MS
+    tickMsRef.current = startMs
     sessionRef.current = null
 
     const initialFood = randomEmptyCell(initial)
@@ -247,10 +361,13 @@ export default function GarbageRun() {
     setSnake(initial)
     setDirection(initialDir)
     setScore(0)
-    setTickMs(TICK_START_MS)
+    setTickMs(startMs)
     setFood(initialFood)
-    setStatus('playing')
+    setRank(null)
     setSubmitStatus('idle')
+    statusRef.current = 'countdown'
+    setStatus('countdown')
+    runCountdown()
 
     // Dinos are left alone on purpose — they live on the page, not the run,
     // so a new game shouldn't clear them out.
@@ -268,8 +385,10 @@ export default function GarbageRun() {
     }
   }
 
+  useEffect(() => () => clearTimeout(countdownTimerRef.current), [])
+
   const handleDirection = (dir) => {
-    if (statusRef.current === 'playing') {
+    if (statusRef.current === 'playing' || statusRef.current === 'countdown') {
       if (dir !== OPPOSITE[directionRef.current]) {
         nextDirectionRef.current = dir
       }
@@ -289,7 +408,10 @@ export default function GarbageRun() {
     const head = snakeNow[0]
     const newHead = { x: head.x + DIRS[dir].x, y: head.y + DIRS[dir].y }
 
-    if (isOutOfBounds(newHead)) {
+    if (wrapRef.current) {
+      newHead.x = (newHead.x + GRID_COLS) % GRID_COLS
+      newHead.y = (newHead.y + GRID_ROWS) % GRID_ROWS
+    } else if (isOutOfBounds(newHead)) {
       endGame()
       return
     }
@@ -308,11 +430,13 @@ export default function GarbageRun() {
     setSnake(newSnake)
 
     if (ateFood) {
+      playPickup()
       const newScore = scoreRef.current + SCORE_PER_FOOD
       scoreRef.current = newScore
       setScore(newScore)
 
-      const nextTick = Math.max(TICK_MIN_MS, tickMsRef.current - TICK_STEP_MS)
+      const diff = DIFFICULTIES[difficultyRef.current]
+      const nextTick = Math.max(diff.minMs, tickMsRef.current - diff.stepMs)
       tickMsRef.current = nextTick
       setTickMs(nextTick)
 
@@ -348,9 +472,16 @@ export default function GarbageRun() {
         handleDirection(dir)
         return
       }
+      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+        if (statusRef.current === 'playing' || statusRef.current === 'paused') {
+          e.preventDefault()
+          togglePause()
+        }
+        return
+      }
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        if (statusRef.current !== 'playing') startGame('right')
+        if (statusRef.current === 'idle' || statusRef.current === 'over') startGame('right')
       }
     }
     window.addEventListener('keydown', onKeyDown)
@@ -394,6 +525,23 @@ export default function GarbageRun() {
     return () => clearInterval(id)
   }, [dinos.length])
 
+  // Swipe the board itself to steer — the D-pad stays for tap control.
+  const onBoardTouchStart = (e) => {
+    const t = e.touches[0]
+    touchStartRef.current = { x: t.clientX, y: t.clientY }
+  }
+  const onBoardTouchEnd = (e) => {
+    const start = touchStartRef.current
+    touchStartRef.current = null
+    if (!start) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - start.x
+    const dy = t.clientY - start.y
+    if (Math.hypot(dx, dy) < 24) return
+    if (Math.abs(dx) > Math.abs(dy)) handleDirection(dx > 0 ? 'right' : 'left')
+    else handleDirection(dy > 0 ? 'down' : 'up')
+  }
+
   const isNewBest = status === 'over' && score > 0 && score >= best
 
   return (
@@ -409,19 +557,35 @@ export default function GarbageRun() {
         <div className="garbage-run-hud">
           <span className="garbage-run-stat">score <strong>{score}</strong></span>
           <span className="garbage-run-stat">best <strong>{best}</strong></span>
+          {(status === 'playing' || status === 'paused') && (
+            <button type="button" className="garbage-run-restart" onClick={togglePause}>
+              {status === 'paused' ? 'resume ▶' : 'pause ⏸'}
+            </button>
+          )}
           {status !== 'idle' && (
             <button type="button" className="garbage-run-restart" onClick={() => startGame('right')}>
               restart ↻
             </button>
           )}
+          <button
+            type="button"
+            className="garbage-run-restart garbage-run-mute"
+            onClick={toggleMute}
+            aria-pressed={muted}
+            title={muted ? 'Unmute' : 'Mute'}
+          >
+            {muted ? '🔇' : '🔊'}
+          </button>
         </div>
 
         <div className="garbage-run-layout">
           <div className="garbage-run-main-col">
             <div
               ref={boardRef}
-              className={`garbage-run-board${status === 'over' ? ' garbage-run-board--shake' : ''}`}
-              style={{ width: boardPx, height: boardPx }}
+              className={`garbage-run-board${status === 'over' ? ' garbage-run-board--shake' : ''}${wrap ? ' garbage-run-board--wrap' : ''}`}
+              style={{ width: boardPx, height: boardPx, touchAction: 'none' }}
+              onTouchStart={onBoardTouchStart}
+              onTouchEnd={onBoardTouchEnd}
             >
               {food && (
                 <img
@@ -458,9 +622,45 @@ export default function GarbageRun() {
 
               {status === 'idle' && (
                 <div className="garbage-run-overlay">
-                  <p>arrow keys / wasd — or tap a direction below</p>
+                  <p>arrow keys / wasd · swipe or tap below</p>
+                  <div className="garbage-run-settings">
+                    <div className="garbage-run-setting-row">
+                      {DIFFICULTY_IDS.map((id) => (
+                        <button
+                          key={id}
+                          type="button"
+                          className={`garbage-run-chip${difficulty === id ? ' active' : ''}`}
+                          onClick={() => setDifficultyPref(id)}
+                        >
+                          {DIFFICULTIES[id].label}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className={`garbage-run-chip${wrap ? ' active' : ''}`}
+                      onClick={toggleWrap}
+                    >
+                      {wrap ? 'walls: wrap around' : 'walls: solid'}
+                    </button>
+                  </div>
                   <button type="button" className="btn-pill pink" style={{ border: 'none', padding: '11px 24px', fontSize: 13 }} onClick={() => startGame('right')}>
                     ▶ start
+                  </button>
+                </div>
+              )}
+
+              {status === 'countdown' && (
+                <div className="garbage-run-overlay garbage-run-overlay--countdown">
+                  <span className="garbage-run-countdown">{countdownN > 0 ? countdownN : 'GO'}</span>
+                </div>
+              )}
+
+              {status === 'paused' && (
+                <div className="garbage-run-overlay">
+                  <p>paused</p>
+                  <button type="button" className="btn-pill pink" style={{ border: 'none', padding: '11px 24px', fontSize: 13 }} onClick={togglePause}>
+                    ▶ resume
                   </button>
                 </div>
               )}
@@ -493,13 +693,40 @@ export default function GarbageRun() {
                   score {score}
                   {isNewBest ? ' — new best!' : ''}
                 </p>
+                {rank && (
+                  <p className="garbage-run-rank">
+                    you placed <strong>#{rank.rank}</strong> of {rank.total}
+                  </p>
+                )}
+
+                <div className="garbage-run-settings garbage-run-settings--panel">
+                  <div className="garbage-run-setting-row">
+                    {DIFFICULTY_IDS.map((id) => (
+                      <button
+                        key={id}
+                        type="button"
+                        className={`garbage-run-chip${difficulty === id ? ' active' : ''}`}
+                        onClick={() => setDifficultyPref(id)}
+                      >
+                        {DIFFICULTIES[id].label}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      className={`garbage-run-chip${wrap ? ' active' : ''}`}
+                      onClick={toggleWrap}
+                    >
+                      {wrap ? 'wrap' : 'solid'}
+                    </button>
+                  </div>
+                </div>
 
                 {SCORES_ENABLED && submitStatus !== 'saved' && !saveModalOpen && (
                   <button type="button" className="garbage-run-restart" onClick={() => setSaveModalOpen(true)}>
                     save score ↑
                   </button>
                 )}
-                {submitStatus === 'saved' && <p className="garbage-run-submit-status">saved to leaderboard ✓</p>}
+                {submitStatus === 'saved' && <p className="garbage-run-submit-status" role="status">saved to leaderboard ✓</p>}
 
                 <button
                   type="button"
@@ -513,76 +740,31 @@ export default function GarbageRun() {
             )}
           </div>
 
-          <div className="garbage-run-leaderboard">
-            <div className="garbage-run-leaderboard-label">// TOP RUNS</div>
-            {!LEADERBOARD_ENABLED && <p className="gallery-empty">leaderboard isn't configured</p>}
-            {leaderboardStatus === 'loading' && <p className="gallery-empty">loading…</p>}
-            {leaderboardStatus === 'error' && <p className="gallery-empty">couldn't load the leaderboard</p>}
-            {leaderboardStatus === 'ready' && leaderboard.length === 0 && (
-              <p className="gallery-empty">no runs yet — be the first</p>
-            )}
-            {leaderboardStatus === 'ready' && leaderboard.length > 0 && (
-              <ol className="garbage-run-leaderboard-list">
-                {leaderboard.map((row, i) => (
-                  <li key={row.id}>
-                    <span className="garbage-run-leaderboard-rank">#{i + 1}</span>
-                    <span className="garbage-run-leaderboard-name">{row.player_name || 'anonymous'}</span>
-                    <span className="garbage-run-leaderboard-score">{row.score}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
+          <Leaderboard
+            label="// TOP RUNS"
+            enabled={LEADERBOARD_ENABLED}
+            status={leaderboardStatus}
+            rows={leaderboard}
+            emptyText="no runs yet — be the first"
+            highlightName={playerName}
+          />
         </div>
 
         {saveModalOpen && (
-          <div className="save-modal-overlay" onClick={closeSaveModal}>
-            <div className="save-modal" role="dialog" aria-modal="true" aria-label="Save score" onClick={(e) => e.stopPropagation()}>
-              <div className="save-modal-label">// SAVE SCORE</div>
-              <p className="save-modal-copy">
-                score {score}. Add your name if you want credit on the leaderboard — or leave it blank.
-              </p>
-              <p className="garbage-run-dino-hint">
-                🦖 psst — type <strong>{DINO_PASSPHRASE}</strong> and see what happens
-              </p>
-              <input
-                ref={nameInputRef}
-                type="text"
-                placeholder="your name (optional)"
-                value={playerName}
-                onChange={(e) => updatePlayerName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') saveScore()
-                }}
-                className="save-modal-input"
-                maxLength={30}
-              />
-              {submitStatus === 'error' && <p className="save-to-gallery-error">couldn't save that run — try again</p>}
-              <div className="save-modal-actions">
-                <button type="button" className="save-modal-cancel" onClick={closeSaveModal} disabled={submitStatus === 'saving'}>
-                  cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn-pill dark"
-                  style={{ padding: '10px 20px', fontSize: 13, border: 'none' }}
-                  onClick={() => startGame('right')}
-                  disabled={submitStatus === 'saving'}
-                >
-                  play again ↻
-                </button>
-                <button
-                  type="button"
-                  className="btn-pill pink"
-                  style={{ padding: '10px 20px', fontSize: 13, border: 'none' }}
-                  onClick={saveScore}
-                  disabled={submitStatus === 'saving' || !sessionReady}
-                >
-                  {submitStatus === 'saving' ? 'saving…' : sessionReady ? 'save ↑' : 'connecting…'}
-                </button>
-              </div>
-            </div>
-          </div>
+          <SaveScoreModal
+            score={score}
+            playerName={playerName}
+            onNameChange={updatePlayerName}
+            onSubmit={saveScore}
+            onClose={closeSaveModal}
+            onPlayAgain={() => startGame('right')}
+            submitStatus={submitStatus}
+            sessionReady={sessionReady}
+          >
+            <p className="garbage-run-dino-hint">
+              🦖 psst — type <strong>{DINO_PASSPHRASE}</strong> and see what happens
+            </p>
+          </SaveScoreModal>
         )}
       </div>
 

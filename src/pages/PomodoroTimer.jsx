@@ -13,20 +13,30 @@ import {
   colorForName,
   initialsForName,
   joinPresence,
+  rememberRoom,
 } from '../lib/pomodoroRoom'
+import { useModal } from '../components/ModalProvider'
+import { outlineBtn } from '../lib/controlStyles'
 
 const RING_RADIUS = 90
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
-const outlineBtn = {
-  background: 'transparent',
-  color: '#8a8a8a',
-  border: '2px solid #e0dbd0',
-  borderRadius: 40,
-  padding: '11px 22px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 13,
-  cursor: 'pointer',
+// Personal, device-local — a task list and a session log kept in localStorage
+// per room. Nothing shared, no table.
+function loadLocal(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch {
+    return fallback
+  }
+}
+function saveLocal(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // ignore
+  }
 }
 
 function formatTime(totalSeconds) {
@@ -45,6 +55,10 @@ function bubbleSize(value, values) {
 
 export default function PomodoroTimer() {
   const { roomId } = useParams()
+  const { confirmAction } = useModal()
+
+  const TASKS_KEY = `pomodoro-tasks-${roomId}`
+  const LOG_KEY = `pomodoro-log-${roomId}`
 
   const [room, setRoom] = useState(null)
   const [loadError, setLoadError] = useState('')
@@ -57,6 +71,9 @@ export default function PomodoroTimer() {
   const [newBreakInput, setNewBreakInput] = useState('')
   const [soundOn, setSoundOn] = useState(true)
   const [copyStatus, setCopyStatus] = useState('idle')
+  const [tasks, setTasks] = useState(() => loadLocal(TASKS_KEY, []))
+  const [taskDraft, setTaskDraft] = useState('')
+  const [sessionLog, setSessionLog] = useState(() => loadLocal(LOG_KEY, []))
 
   const roomRef = useRef(null)
   const completingRef = useRef(null)
@@ -75,7 +92,10 @@ export default function PomodoroTimer() {
     let cancelled = false
     fetchRoom(roomId)
       .then((row) => {
-        if (!cancelled) setRoom(row)
+        if (!cancelled) {
+          setRoom(row)
+          rememberRoom(roomId) // so /pomodoro can offer "rejoin"
+        }
       })
       .catch(() => {
         if (!cancelled) setLoadError("Couldn't find that room.")
@@ -86,6 +106,16 @@ export default function PomodoroTimer() {
       unsubscribe()
     }
   }, [roomId])
+
+  useEffect(() => {
+    saveLocal(TASKS_KEY, tasks)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks])
+
+  useEffect(() => {
+    saveLocal(LOG_KEY, sessionLog)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionLog])
 
   // Presence — who else is here right now.
   useEffect(() => {
@@ -128,6 +158,12 @@ export default function PomodoroTimer() {
     if (prevPhaseRef.current && prevPhaseRef.current !== room.phase) {
       playChime()
       notifyPhaseEnd(room.phase)
+      // A work → break flip means a focus session just finished — log it locally.
+      if (prevPhaseRef.current === 'work') {
+        setSessionLog((prev) =>
+          [...prev, { at: Date.now(), minutes: roomRef.current?.work_minutes || room.work_minutes }].slice(-200),
+        )
+      }
     }
     prevPhaseRef.current = room.phase
   }, [room?.phase])
@@ -222,6 +258,28 @@ export default function PomodoroTimer() {
       () => {},
     )
   }
+
+  // reset and skip change the timer for everyone in the room — confirm first.
+  const confirmedAction = async (action, message) => {
+    const ok = await confirmAction(message)
+    if (ok) runAction(action)
+  }
+
+  const addTask = (e) => {
+    e.preventDefault()
+    const text = taskDraft.trim().slice(0, 120)
+    if (!text) return
+    setTasks((prev) => [...prev, { id: `t${Date.now()}`, text, done: false }])
+    setTaskDraft('')
+  }
+  const toggleTask = (id) =>
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
+  const removeTask = (id) => setTasks((prev) => prev.filter((t) => t.id !== id))
+  const clearDoneTasks = () => setTasks((prev) => prev.filter((t) => !t.done))
+
+  const today = new Date().toDateString()
+  const todaySessions = sessionLog.filter((s) => new Date(s.at).toDateString() === today)
+  const todayMinutes = todaySessions.reduce((sum, s) => sum + (s.minutes || 0), 0)
 
   if (!ROOMS_ENABLED) {
     return (
@@ -351,10 +409,18 @@ export default function PomodoroTimer() {
                   ⏸ pause
                 </button>
               )}
-              <button type="button" style={outlineBtn} onClick={() => runAction('skip')}>
+              <button
+                type="button"
+                style={outlineBtn}
+                onClick={() => confirmedAction('skip', 'Skip to the next phase for everyone in the room?')}
+              >
                 skip ⏭
               </button>
-              <button type="button" style={outlineBtn} onClick={() => runAction('reset')}>
+              <button
+                type="button"
+                style={outlineBtn}
+                onClick={() => confirmedAction('reset', 'Reset the timer for everyone in the room?')}
+              >
                 reset ↻
               </button>
               <button
@@ -484,6 +550,63 @@ export default function PomodoroTimer() {
               <button type="button" className="pomodoro-share-btn" onClick={copyLink}>
                 {copyStatus === 'copied' ? 'copied ✓' : 'copy link 🔗'}
               </button>
+            </div>
+
+            <div className="pomodoro-panel">
+              <div className="pomodoro-preset-label">// THIS SESSION (on this device)</div>
+              <form className="pomodoro-task-form" onSubmit={addTask}>
+                <input
+                  type="text"
+                  value={taskDraft}
+                  onChange={(e) => setTaskDraft(e.target.value)}
+                  placeholder="what are you working on?"
+                  className="pomodoro-add-input pomodoro-task-input"
+                  maxLength={120}
+                />
+                <button type="submit" className="pomodoro-add-btn" aria-label="Add task">+</button>
+              </form>
+              {tasks.length > 0 && (
+                <ul className="pomodoro-task-list">
+                  {tasks.map((t) => (
+                    <li key={t.id} className={`pomodoro-task${t.done ? ' done' : ''}`}>
+                      <label>
+                        <input type="checkbox" checked={t.done} onChange={() => toggleTask(t.id)} />
+                        <span>{t.text}</span>
+                      </label>
+                      <button
+                        type="button"
+                        className="pomodoro-task-remove"
+                        aria-label="Remove task"
+                        onClick={() => removeTask(t.id)}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {tasks.some((t) => t.done) && (
+                <button type="button" className="pomodoro-rename-link" onClick={clearDoneTasks}>
+                  clear done
+                </button>
+              )}
+            </div>
+
+            <div className="pomodoro-panel">
+              <div className="pomodoro-preset-label">// TODAY</div>
+              <p className="pomodoro-log-summary">
+                <strong>{todaySessions.length}</strong> focus session{todaySessions.length === 1 ? '' : 's'}
+                {todayMinutes > 0 && (
+                  <>
+                    {' · '}
+                    {Math.floor(todayMinutes / 60) > 0 ? `${Math.floor(todayMinutes / 60)}h ` : ''}
+                    {todayMinutes % 60}m
+                  </>
+                )}
+              </p>
+              {sessionLog.length > todaySessions.length && (
+                <p className="pomodoro-log-total">{sessionLog.length} logged all-time on this device</p>
+              )}
             </div>
 
             <div className="pomodoro-panel">

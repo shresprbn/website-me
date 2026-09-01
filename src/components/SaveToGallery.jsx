@@ -93,7 +93,7 @@ export default function SaveToGallery({ kind, getData, getThumbnailBlob, hasCont
         save to gallery ↑
       </button>
       {savedId && (
-        <div className="save-share-box">
+        <div className="save-share-box" role="status">
           <span className="save-share-label">saved!</span>
           <input
             type="text"
@@ -147,7 +147,7 @@ export default function SaveToGallery({ kind, getData, getThumbnailBlob, hasCont
                 maxLength={60}
               />
             </div>
-            {error && <p className="save-to-gallery-error">{error}</p>}
+            {error && <p className="save-to-gallery-error" role="alert">{error}</p>}
             <div className="save-modal-actions">
               <button type="button" className="save-modal-cancel" onClick={closeModal} disabled={saving}>
                 cancel

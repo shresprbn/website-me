@@ -586,6 +586,73 @@ function sameCharacter(a, b) {
   return FEATURES.every((f) => a[f.id] === b[f.id])
 }
 
+// Pick a fresh option for one feature — the single-part "reroll" die. Tries to
+// land on something different from what's showing.
+export function rerollFeature(featureId, currentOptionId) {
+  const feature = FEATURES.find((f) => f.id === featureId)
+  if (!feature || feature.options.length < 2) return currentOptionId
+  let next = currentOptionId
+  let guard = 0
+  while (next === currentOptionId && guard < 16) {
+    next = feature.options[Math.floor(Math.random() * feature.options.length)].id
+    guard += 1
+  }
+  return next
+}
+
+// Same idea for a colour slot — roll a new swatch from that key's palette.
+export function rerollColor(key, currentColor) {
+  const entry = COLOR_KEYS.find((k) => k.key === key)
+  if (!entry || entry.swatches.length < 2) return currentColor
+  let next = currentColor
+  let guard = 0
+  while (next === currentColor && guard < 16) {
+    next = entry.swatches[Math.floor(Math.random() * entry.swatches.length)]
+    guard += 1
+  }
+  return next
+}
+
+// ── Share links ──────────────────────────────────────────────────────
+// Pack {character, colors} into a short URL-safe token. Positional by
+// FEATURES / COLOR_KEYS order, but stores option *ids* (not indices) so a
+// reordered options list doesn't silently scramble an old link.
+export function encodeCharacter({ character, colors }) {
+  const payload = {
+    p: FEATURES.map((f) => character[f.id]),
+    c: COLOR_KEYS.map(({ key }) => String(colors[key] || '').replace('#', '')),
+  }
+  const b64 = btoa(JSON.stringify(payload))
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+export function decodeCharacter(token) {
+  try {
+    const b64 = token.replace(/-/g, '+').replace(/_/g, '/')
+    const { p, c } = JSON.parse(atob(b64))
+    if (!Array.isArray(p) || !Array.isArray(c)) return null
+
+    const character = {}
+    FEATURES.forEach((f, i) => {
+      const valid = f.options.some((o) => o.id === p[i])
+      character[f.id] = valid ? p[i] : (f.defaultOption ?? f.options[0].id)
+    })
+
+    const colors = {}
+    COLOR_KEYS.forEach(({ key }, i) => {
+      const raw = c[i]
+      colors[key] =
+        typeof raw === 'string' && /^[0-9a-f]{3}([0-9a-f]{3})?$/i.test(raw)
+          ? `#${raw}`
+          : DEFAULT_COLORS[key]
+    })
+
+    return { character, colors }
+  } catch {
+    return null
+  }
+}
+
 // Shift a hex toward black (negative) or white (positive) by `amount` steps.
 export function shadeColor(hex, amount) {
   const clean = hex.replace('#', '')
@@ -600,8 +667,14 @@ export function shadeColor(hex, amount) {
   return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`
 }
 
-export function exportCharacterPng(svgEl, scale = 3, filename = 'character.png') {
-  if (!svgEl) return
+// Rasterises the live character <svg> onto a fresh canvas (with the same
+// paper-coloured background the maker shows) and hands it back. Shared by the
+// PNG download and the gallery-thumbnail path.
+function renderCharacterCanvas(svgEl, scale, onReady, onError) {
+  if (!svgEl) {
+    onError?.(new Error('No character to render.'))
+    return
+  }
 
   const clone = svgEl.cloneNode(true)
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
@@ -610,17 +683,27 @@ export function exportCharacterPng(svgEl, scale = 3, filename = 'character.png')
   const xml = new XMLSerializer().serializeToString(clone)
 
   const img = new Image()
+  img.onerror = () => onError?.(new Error("Couldn't render the character image."))
   img.onload = () => {
     const canvas = document.createElement('canvas')
     canvas.width = VIEW_W * scale
     canvas.height = VIEW_H * scale
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    if (!ctx) {
+      onError?.(new Error('Canvas is not available.'))
+      return
+    }
 
     ctx.fillStyle = '#faf8f3'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+    onReady(canvas)
+  }
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml)
+}
 
+export function exportCharacterPng(svgEl, scale = 3, filename = 'character.png') {
+  renderCharacterCanvas(svgEl, scale, (canvas) => {
     canvas.toBlob((blob) => {
       if (!blob) return
       const url = URL.createObjectURL(blob)
@@ -631,6 +714,21 @@ export function exportCharacterPng(svgEl, scale = 3, filename = 'character.png')
       // revoking synchronously can cancel the download in some browsers
       setTimeout(() => URL.revokeObjectURL(url), 0)
     }, 'image/png')
-  }
-  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml)
+  })
+}
+
+// Promise<Blob> version for SaveToGallery's getThumbnailBlob.
+export function characterToBlob(svgEl, scale = 4) {
+  return new Promise((resolve, reject) => {
+    renderCharacterCanvas(
+      svgEl,
+      scale,
+      (canvas) =>
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error('Could not render character.'))),
+          'image/png',
+        ),
+      reject,
+    )
+  })
 }

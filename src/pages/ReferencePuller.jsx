@@ -11,34 +11,9 @@ import {
   preloadImage,
   sourceLabel,
 } from '../lib/artUtils'
+import { outlineBtn, presetBtn, makeActivePreset } from '../lib/controlStyles'
 
-const outlineBtn = {
-  background: 'transparent',
-  color: '#8a8a8a',
-  border: '2px solid #e0dbd0',
-  borderRadius: 40,
-  padding: '11px 22px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 13,
-  cursor: 'pointer',
-}
-
-const presetBtn = {
-  background: '#faf8f3',
-  color: '#141414',
-  border: '1px solid #e8e3d8',
-  borderRadius: 40,
-  padding: '9px 18px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 12,
-  cursor: 'pointer',
-}
-
-const activePresetBtn = {
-  ...presetBtn,
-  border: `2px solid ${ACCENT}`,
-  background: 'rgba(124, 108, 240, .12)',
-}
+const activePresetBtn = makeActivePreset(ACCENT)
 
 const MODES = [
   { id: 'viewer', label: 'viewer' },
@@ -46,15 +21,26 @@ const MODES = [
   { id: 'gallery', label: 'gallery' },
 ]
 
+const HISTORY_CAP = 40
+const CENTER = { x: 50, y: 50 }
+
 export default function ReferencePuller() {
   const [mode, setMode] = useState('viewer')
   const [sourceIds, setSourceIds] = useState(SOURCES.map((s) => s.id))
-  const [highlightsOnly, setHighlightsOnly] = useState(true)
-  const [artwork, setArtwork] = useState(null)
+  const [highlightsOnly, setHighlightsOnly] = useState(false)
+  const [history, setHistory] = useState([])
+  const [histIndex, setHistIndex] = useState(-1)
   const [gallery, setGallery] = useState([])
+  const [galleryLoading, setGalleryLoading] = useState(false)
   const [status, setStatus] = useState('loading') // loading | ready | error
   const [error, setError] = useState('')
   const [pulling, setPulling] = useState(false)
+
+  // Study aids — all sticky across pulls; the magnifier focal recenters.
+  const [grayscale, setGrayscale] = useState(false)
+  const [flip, setFlip] = useState(false)
+  const [detail, setDetail] = useState(false)
+  const [focal, setFocal] = useState(CENTER)
 
   const [seconds, setSeconds] = useState(TIMER_PRESETS[1].seconds)
   const [remaining, setRemaining] = useState(TIMER_PRESETS[1].seconds)
@@ -66,8 +52,27 @@ export default function ReferencePuller() {
   const nextRef = useRef(null)
   const modeRef = useRef(mode)
   const secondsRef = useRef(seconds)
+  const historyRef = useRef([])
+  const histIndexRef = useRef(-1)
   modeRef.current = mode
   secondsRef.current = seconds
+  historyRef.current = history
+  histIndexRef.current = histIndex
+
+  const artwork = histIndex >= 0 ? history[histIndex] : null
+  const hasPrev = histIndex > 0
+  const hasSeenNext = histIndex >= 0 && histIndex < history.length - 1
+
+  // Push a freshly-pulled artwork, dropping any "forward" history first —
+  // browser-style: pulling a new one after going back rewrites the future.
+  const pushArtwork = (art) => {
+    const base = historyRef.current.slice(0, histIndexRef.current + 1)
+    const next = [...base, art].slice(-HISTORY_CAP)
+    historyRef.current = next
+    histIndexRef.current = next.length - 1
+    setHistory(next)
+    setHistIndex(next.length - 1)
+  }
 
   // Warm the next image so a timed study never opens on a blank frame.
   const primeNext = useCallback(async () => {
@@ -92,7 +97,7 @@ export default function ReferencePuller() {
       nextRef.current = null
       const next = queued || (await drawArtwork(bag, undefined))
       if (next) {
-        setArtwork(next)
+        pushArtwork(next)
         setRemaining(secondsRef.current)
       }
       primeNext()
@@ -101,7 +106,34 @@ export default function ReferencePuller() {
     } finally {
       setPulling(false)
     }
+    // pushArtwork is stable (only touches refs + setState)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primeNext])
+
+  // Step back through already-seen references — no network, no repeat draw.
+  const goPrev = useCallback(() => {
+    if (histIndexRef.current <= 0) return
+    const i = histIndexRef.current - 1
+    histIndexRef.current = i
+    setHistIndex(i)
+    setRevealed(true)
+    setRunning(false)
+    setRemaining(secondsRef.current)
+  }, [])
+
+  // Forward: walk seen history first, only hit the API once you're at the end.
+  const goNext = useCallback(() => {
+    if (histIndexRef.current < historyRef.current.length - 1) {
+      const i = histIndexRef.current + 1
+      histIndexRef.current = i
+      setHistIndex(i)
+      setRevealed(true)
+      setRunning(false)
+      setRemaining(secondsRef.current)
+      return
+    }
+    pull()
+  }, [pull])
 
   // Build the pool whenever the chosen sources change.
   useEffect(() => {
@@ -111,7 +143,10 @@ export default function ReferencePuller() {
 
     setStatus('loading')
     setError('')
-    setArtwork(null)
+    setHistory([])
+    setHistIndex(-1)
+    historyRef.current = []
+    histIndexRef.current = -1
     setGallery([])
     nextRef.current = null
 
@@ -129,7 +164,7 @@ export default function ReferencePuller() {
         } else {
           const first = await drawArtwork(bag, controller.signal)
           if (cancelled) return
-          setArtwork(first)
+          if (first) pushArtwork(first)
           primeNext()
         }
         setStatus('ready')
@@ -145,6 +180,7 @@ export default function ReferencePuller() {
       cancelled = true
       controller.abort()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourceIds, highlightsOnly, primeNext])
 
   // Fill the gallery on first switch into it.
@@ -160,6 +196,11 @@ export default function ReferencePuller() {
       cancelled = true
     }
   }, [mode, status, gallery.length])
+
+  // Magnifier focal + timed reveal reset on every new piece.
+  useEffect(() => {
+    setFocal(CENTER)
+  }, [artwork?.key])
 
   // Countdown against a wall-clock deadline — a decrementing counter drifts
   // badly once the tab is backgrounded and throttled.
@@ -184,18 +225,23 @@ export default function ReferencePuller() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, mode, artwork, pull])
 
-  // Spacebar pulls the next reference.
+  // Keyboard: space / → advance, ← goes back.
   useEffect(() => {
     function onKey(e) {
-      if (e.code !== 'Space' || mode === 'gallery') return
+      if (mode === 'gallery') return
       const tag = (e.target.tagName || '').toLowerCase()
       if (tag === 'input' || tag === 'textarea' || tag === 'button') return
-      e.preventDefault()
-      pull()
+      if (e.code === 'Space' || e.code === 'ArrowRight') {
+        e.preventDefault()
+        goNext()
+      } else if (e.code === 'ArrowLeft') {
+        e.preventDefault()
+        goPrev()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [pull, mode])
+  }, [goNext, goPrev, mode])
 
   function toggleSource(id) {
     setSourceIds((prev) => {
@@ -217,12 +263,92 @@ export default function ReferencePuller() {
   }
 
   function openFromGallery(item) {
-    setArtwork(item)
+    pushArtwork(item)
     setMode('viewer')
     setRevealed(true)
   }
 
+  async function loadMoreGallery() {
+    const bag = bagRef.current
+    if (!bag || galleryLoading) return
+    setGalleryLoading(true)
+    try {
+      const more = await drawGallery(bag, undefined)
+      setGallery((g) => {
+        const seen = new Set(g.map((x) => x.key))
+        return [...g, ...more.filter((m) => !seen.has(m.key))]
+      })
+    } catch {
+      // leave what's there
+    } finally {
+      setGalleryLoading(false)
+    }
+  }
+
+  function onFrameMove(e) {
+    if (!detail) return
+    const r = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - r.left) / r.width) * 100
+    const y = ((e.clientY - r.top) / r.height) * 100
+    setFocal({
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+    })
+  }
+
   const hideBlurb = mode === 'timer' && running && !revealed
+  const originX = flip ? 100 - focal.x : focal.x
+  const imgStyle = {
+    filter: grayscale ? 'grayscale(1) contrast(1.05)' : undefined,
+    transform: `scaleX(${flip ? -1 : 1}) scale(${detail ? 2 : 1})`,
+    transformOrigin: `${originX}% ${focal.y}%`,
+    cursor: detail ? 'crosshair' : undefined,
+    transition: 'transform .12s ease-out, filter .12s ease-out',
+  }
+
+  const navRow = (
+    <div className="reference-nav">
+      <button style={outlineBtn} onClick={goPrev} disabled={!hasPrev}>
+        ← prev
+      </button>
+      <button style={outlineBtn} onClick={goNext} disabled={pulling}>
+        {hasSeenNext ? 'next →' : pulling ? 'Pulling…' : 'pull another →'}
+      </button>
+      <span className="reference-hint">
+        {histIndex >= 0 ? `${histIndex + 1} / ${history.length}` : ''} · ← → or space
+      </span>
+    </div>
+  )
+
+  const studyTools = (
+    <div className="reference-study-tools">
+      <span className="reference-chip-label">study</span>
+      <button
+        style={grayscale ? activePresetBtn : presetBtn}
+        onClick={() => setGrayscale((v) => !v)}
+        aria-pressed={grayscale}
+        title="Value study — drop the colour"
+      >
+        ◑ grayscale
+      </button>
+      <button
+        style={flip ? activePresetBtn : presetBtn}
+        onClick={() => setFlip((v) => !v)}
+        aria-pressed={flip}
+        title="Fresh eyes — mirror the image"
+      >
+        ⇋ flip
+      </button>
+      <button
+        style={detail ? activePresetBtn : presetBtn}
+        onClick={() => setDetail((v) => !v)}
+        aria-pressed={detail}
+        title="Magnify — move the pointer over the image"
+      >
+        ⌕ detail
+      </button>
+    </div>
+  )
 
   return (
     <div style={{ color: '#141414', background: '#f7f5f0', minHeight: '100vh' }}>
@@ -288,13 +414,21 @@ export default function ReferencePuller() {
 
         {status === 'ready' && mode !== 'gallery' && artwork && (
           <div className="reference-viewer">
-            <div className="reference-frame">
-              <img
-                key={artwork.key}
-                src={artwork.imageUrl}
-                alt={artwork.title}
-                onError={handleImageError}
-              />
+            <div className="reference-frame-col">
+              {studyTools}
+              <div
+                className="reference-frame"
+                onMouseMove={onFrameMove}
+                onMouseLeave={() => detail && setFocal(CENTER)}
+              >
+                <img
+                  key={artwork.key}
+                  src={artwork.imageUrl}
+                  alt={artwork.title}
+                  onError={handleImageError}
+                  style={imgStyle}
+                />
+              </div>
             </div>
 
             <div className="reference-meta">
@@ -307,7 +441,7 @@ export default function ReferencePuller() {
                     accent={ACCENT}
                     onChoose={chooseSeconds}
                     onToggle={() => setRunning((r) => !r)}
-                    onSkip={pull}
+                    onSkip={goNext}
                     skipDisabled={pulling}
                   />
                 </div>
@@ -340,27 +474,29 @@ export default function ReferencePuller() {
                 )}
               </div>
 
-              {mode === 'viewer' && (
-                <div className="reference-chips">
-                  <button style={outlineBtn} onClick={pull} disabled={pulling}>
-                    {pulling ? 'Pulling…' : 'Pull another'}
-                  </button>
-                  <span className="reference-hint">or hit space</span>
-                </div>
-              )}
+              {navRow}
             </div>
           </div>
         )}
 
         {status === 'ready' && mode === 'gallery' && (
-          <div className="reference-gallery">
-            {gallery.map((item) => (
-              <button key={item.key} className="reference-tile" onClick={() => openFromGallery(item)}>
-                <img src={item.thumbUrl} alt={item.title} loading="lazy" />
-                <span className="reference-tile-title">{item.title}</span>
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="reference-gallery">
+              {gallery.map((item) => (
+                <button key={item.key} className="reference-tile" onClick={() => openFromGallery(item)}>
+                  <img src={item.thumbUrl} alt={item.title} loading="lazy" />
+                  <span className="reference-tile-title">{item.title}</span>
+                </button>
+              ))}
+            </div>
+            {gallery.length > 0 && (
+              <div className="reference-gallery-more">
+                <button style={outlineBtn} onClick={loadMoreGallery} disabled={galleryLoading}>
+                  {galleryLoading ? 'loading…' : 'load more'}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         <p className="reference-credit">

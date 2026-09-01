@@ -2,36 +2,11 @@ import { useEffect, useState } from 'react'
 import Nav from '../components/Nav'
 import StudyTimer from '../components/StudyTimer'
 import { CONTEXT_TRAITS, FEATURE_TRAITS, randomFace } from '../lib/faceStudyUtils'
+import { outlineBtn, presetBtn, makeActivePreset } from '../lib/controlStyles'
 
 const ACCENT = '#e07a5f'
 
-const outlineBtn = {
-  background: 'transparent',
-  color: '#8a8a8a',
-  border: '2px solid #e0dbd0',
-  borderRadius: 40,
-  padding: '11px 22px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 13,
-  cursor: 'pointer',
-}
-
-const presetBtn = {
-  background: '#faf8f3',
-  color: '#141414',
-  border: '1px solid #e8e3d8',
-  borderRadius: 40,
-  padding: '9px 18px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 12,
-  cursor: 'pointer',
-}
-
-const activePresetBtn = {
-  ...presetBtn,
-  border: `2px solid ${ACCENT}`,
-  background: 'rgba(224, 122, 95, .12)',
-}
+const activePresetBtn = makeActivePreset(ACCENT)
 
 const fmt = (s) =>
   `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Matter from 'matter-js'
 import Nav from '../components/Nav'
+import { outlineBtn, presetBtn } from '../lib/controlStyles'
 import tinkerer from '../assets/tinkerer_big.png'
 
 const BALL_TYPES = [
@@ -22,27 +23,6 @@ const BALL_LIFESPAN_MS = 60000
 const MIN_LEN = 50
 const MAX_LEN = 420
 const SPINNER_RADIUS = 28
-
-const outlineBtn = {
-  background: 'transparent',
-  color: '#8a8a8a',
-  border: '2px solid #e0dbd0',
-  borderRadius: 40,
-  padding: '11px 22px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 13,
-  cursor: 'pointer',
-}
-const presetBtn = {
-  background: '#faf8f3',
-  color: '#141414',
-  border: '1px solid #e8e3d8',
-  borderRadius: 40,
-  padding: '9px 18px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 12,
-  cursor: 'pointer',
-}
 
 export default function BounceLab() {
   const wrapRef = useRef(null)
@@ -82,6 +62,11 @@ export default function BounceLab() {
       osc.stop(now + 0.3)
     }
 
+    // Render at the device's pixel density so the balls and sprites aren't a
+    // blurry mess on retina / hi-DPI screens. Capped at 2× — past that it's
+    // just wasted fill rate.
+    const DPR = Math.min(window.devicePixelRatio || 1, 2)
+
     const engine = Engine.create()
     engine.gravity.y = 0.5
 
@@ -99,7 +84,7 @@ export default function BounceLab() {
         height: h,
         wireframes: false,
         background: 'transparent',
-        pixelRatio: 1,
+        pixelRatio: DPR,
       },
     })
     Render.run(render)
@@ -463,7 +448,7 @@ export default function BounceLab() {
     window.addEventListener('touchcancel', onPointerUp)
 
     const mouse = Mouse.create(canvas)
-    mouse.pixelRatio = 1
+    mouse.pixelRatio = DPR
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse,
       constraint: { stiffness: 0.2, render: { visible: false } },
@@ -523,17 +508,14 @@ export default function BounceLab() {
 
       w = size.w
       h = size.h
-      render.options.width = w
-      render.options.height = h
       render.bounds.min.x = 0
       render.bounds.min.y = 0
-      render.bounds.max.x = w
-      render.bounds.max.y = h
-      render.canvas.width = w
-      render.canvas.height = h
+      // Render.setSize keeps the backing store at w·DPR × h·DPR while the CSS
+      // box stays w × h — the crisp-on-retina part. It also moves bounds.max.
+      Render.setSize(render, w, h)
       render.canvas.style.width = '100%'
       render.canvas.style.height = '100%'
-      mouse.pixelRatio = 1
+      mouse.pixelRatio = DPR
 
       Composite.remove(engine.world, [ceiling, leftWall, rightWall])
       ceiling = Bodies.rectangle(w / 2, -20, w * 2, 40, wallOpts)

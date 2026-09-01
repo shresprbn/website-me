@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
 import { NOTES_ENABLED, NOTES_PAGE_SIZE, addNote, deleteNote, fetchNotesPage } from '../lib/notes'
+import { flagNote, markPosted, postCooldownLeft } from '../lib/moderation'
 import { DEBUG_PASSPHRASE, useDebugMode } from '../hooks/useDebugMode'
 import { useModal } from '../components/ModalProvider'
 
@@ -19,12 +20,49 @@ function noteColor(id) {
   return NOTE_COLORS[hashStr(id) % NOTE_COLORS.length]
 }
 
+// A gentle tilt for character — kept shallow (±3.5°) so it doesn't fight
+// readability, and CSS straightens the note on hover/focus.
 function noteRotation(id) {
-  return (hashStr(`${id}r`) % 13) - 6
+  return (hashStr(`${id}r`) % 15) / 2 - 3.5
 }
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+// Turn bare URLs in a note into real links. Trailing sentence punctuation is
+// pushed back out of the link so "see foo.com." doesn't linkify the period.
+const URL_RE = /\b(https?:\/\/[^\s<>]+|www\.[^\s<>]+)/gi
+function linkify(text) {
+  const out = []
+  let last = 0
+  for (const m of text.matchAll(URL_RE)) {
+    const start = m.index
+    let url = m[0]
+    let trailing = ''
+    const tail = url.match(/[.,;:!?)\]]+$/)
+    if (tail) {
+      trailing = tail[0]
+      url = url.slice(0, -trailing.length)
+    }
+    if (start > last) out.push(text.slice(last, start))
+    const href = url.startsWith('http') ? url : `https://${url}`
+    out.push(
+      <a
+        key={start}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="sticky-note-link"
+      >
+        {url}
+      </a>,
+    )
+    if (trailing) out.push(trailing)
+    last = start + m[0].length
+  }
+  if (last < text.length) out.push(text.slice(last))
+  return out.length ? out : text
 }
 
 export default function StickyNotes() {
@@ -77,20 +115,56 @@ export default function StickyNotes() {
 
   const submitNote = async () => {
     const trimmed = body.trim()
-    if (!trimmed) return
+    if (!trimmed || posting) return
+
+    const cooldown = postCooldownLeft()
+    if (cooldown > 0) {
+      setPostError(`Hang on ${Math.ceil(cooldown / 1000)}s — one note at a time.`)
+      return
+    }
+    const flag = flagNote(trimmed)
+    if (flag) {
+      setPostError(flag)
+      return
+    }
+
     setPosting(true)
     setPostError('')
     try {
-      await addNote({ body: trimmed.slice(0, MAX_BODY), authorName: authorName.trim() })
+      const result = await addNote({ body: trimmed.slice(0, MAX_BODY), authorName: authorName.trim() })
+      markPosted()
+
+      // Show it straight away instead of refetching page 0 and scroll-jumping.
+      const posted = result?.id
+        ? result
+        : {
+            id: `local-${Date.now()}`,
+            body: trimmed.slice(0, MAX_BODY),
+            author_name: authorName.trim() || null,
+            created_at: new Date().toISOString(),
+          }
+
       setBody('')
       setAuthorName('')
       setModalOpen(false)
-      if (page === 0) load(0)
-      else setPage(0)
+
+      if (page === 0) {
+        setNotes((prev) => (prev.some((n) => n.id === posted.id) ? prev : [posted, ...prev]))
+        setTotal((t) => t + 1)
+      } else {
+        setPage(0)
+      }
     } catch (err) {
       setPostError(err.message || 'Could not post — try again.')
     } finally {
       setPosting(false)
+    }
+  }
+
+  const onBodyKeyDown = (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault()
+      submitNote()
     }
   }
 
@@ -142,7 +216,7 @@ export default function StickyNotes() {
                 <div
                   key={n.id}
                   className={`sticky-note${removingIds.has(n.id) ? ' sticky-note--removing' : ''}`}
-                  style={{ background: noteColor(n.id), transform: `rotate(${noteRotation(n.id)}deg)` }}
+                  style={{ background: noteColor(n.id), '--note-rot': `${noteRotation(n.id)}deg` }}
                 >
                   <span className="sticky-note-pin" />
                   {debugMode && (
@@ -150,7 +224,7 @@ export default function StickyNotes() {
                       ×
                     </button>
                   )}
-                  <p className="sticky-note-body">{n.body}</p>
+                  <p className="sticky-note-body">{linkify(n.body)}</p>
                   <div className="sticky-note-meta">
                     {n.author_name ? `— ${n.author_name}` : ''} <span className="sticky-note-date">{formatDate(n.created_at)}</span>
                   </div>
@@ -198,12 +272,16 @@ export default function StickyNotes() {
                 placeholder="write something…"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
+                onKeyDown={onBodyKeyDown}
                 className="save-modal-input"
                 style={{ borderRadius: 10, resize: 'vertical', fontFamily: "'Space Mono', monospace" }}
                 rows={3}
                 maxLength={MAX_BODY}
               />
-              <div className="notes-modal-counter">{MAX_BODY - body.length} left</div>
+              <div className="notes-modal-counter">
+                <span>{MAX_BODY - body.length} left</span>
+                <span className="notes-modal-hint">⌘/Ctrl + ↵ to post</span>
+              </div>
               <input
                 type="text"
                 placeholder="your name (optional)"
@@ -216,7 +294,7 @@ export default function StickyNotes() {
                 maxLength={30}
               />
             </div>
-            {postError && <p className="save-to-gallery-error">{postError}</p>}
+            {postError && <p className="save-to-gallery-error" role="alert">{postError}</p>}
             <div className="save-modal-actions">
               <button type="button" className="save-modal-cancel" onClick={closeModal} disabled={posting}>
                 cancel

@@ -23,18 +23,24 @@ export async function saveCreation({ kind, data, thumbnailBlob, title, creatorNa
   return res.json()
 }
 
-export async function fetchCreations(kind, limit = 60) {
-  if (!supabase) return []
+export const GALLERY_PAGE_SIZE = 24
+
+// One page of creations, newest first. `total` is the full count for that
+// filter, so the caller knows when it has reached the end (infinite scroll).
+export async function fetchCreationsPage(kind, page = 0, pageSize = GALLERY_PAGE_SIZE) {
+  if (!supabase) return { creations: [], total: 0 }
+  const from = page * pageSize
+  const to = from + pageSize - 1
   let query = supabase
     .from('creations')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .range(from, to)
   if (kind) query = query.eq('kind', kind)
 
-  const { data, error } = await query
+  const { data, error, count } = await query
   if (error) throw error
-  return data
+  return { creations: data || [], total: count || 0 }
 }
 
 export async function deleteCreation(id, passphrase) {

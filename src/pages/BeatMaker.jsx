@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
 import SaveToGallery from '../components/SaveToGallery'
 import { useModal } from '../components/ModalProvider'
+import { outlineBtn, presetBtn } from '../lib/controlStyles'
 import {
   TRACKS,
   STEPS_PER_BAR,
@@ -30,34 +31,6 @@ import {
   playMelodyByIndex,
   octaveStepLines,
 } from '../lib/melodyUtils'
-
-const outlineBtn = {
-  background: 'transparent',
-  color: '#8a8a8a',
-  border: '2px solid #e0dbd0',
-  borderRadius: 40,
-  padding: '11px 22px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 13,
-  cursor: 'pointer',
-}
-
-const presetBtn = {
-  background: '#faf8f3',
-  color: '#141414',
-  border: '1px solid #e8e3d8',
-  borderRadius: 40,
-  padding: '9px 18px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 12,
-  cursor: 'pointer',
-}
-
-const activePresetBtn = {
-  ...presetBtn,
-  border: '2px solid #ffb800',
-  background: 'rgba(255, 184, 0, .12)',
-}
 
 function clampBpm(n) {
   if (!Number.isFinite(n)) return DEFAULT_BPM

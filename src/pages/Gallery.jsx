@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
-import { deleteCreation, fetchCreations, GALLERY_ENABLED } from '../lib/gallery'
+import { deleteCreation, fetchCreationsPage, GALLERY_ENABLED } from '../lib/gallery'
 import { DEBUG_PASSPHRASE, useDebugMode } from '../hooks/useDebugMode'
 import { useModal } from '../components/ModalProvider'
 
@@ -19,32 +19,81 @@ function formatDate(iso) {
 export default function Gallery() {
   const [kind, setKind] = useState(null)
   const [creations, setCreations] = useState([])
-  const [status, setStatus] = useState('loading')
+  const [total, setTotal] = useState(0)
+  const [status, setStatus] = useState('loading') // loading | ready | error | unconfigured
+  const [loadingMore, setLoadingMore] = useState(false)
   const { debugMode, flash } = useDebugMode()
   const [removingIds, setRemovingIds] = useState(() => new Set())
   const { alertUser } = useModal()
+
+  const kindRef = useRef(kind)
+  const pageRef = useRef(0)
+  const loadingRef = useRef(false)
+  const creationsRef = useRef(creations)
+  const totalRef = useRef(total)
+  const sentinelRef = useRef(null)
+  kindRef.current = kind
+  creationsRef.current = creations
+  totalRef.current = total
+
+  const load = useCallback(async (targetKind, targetPage, replace) => {
+    if (loadingRef.current) return
+    loadingRef.current = true
+    if (replace) setStatus('loading')
+    else setLoadingMore(true)
+    try {
+      const { creations: rows, total: t } = await fetchCreationsPage(targetKind, targetPage)
+      // A response that landed after the tab was switched is stale — drop it.
+      if (kindRef.current !== targetKind) return
+      setTotal(t)
+      setCreations((prev) => {
+        if (replace) return rows
+        const seen = new Set(prev.map((c) => c.id))
+        return [...prev, ...rows.filter((r) => !seen.has(r.id))]
+      })
+      pageRef.current = targetPage
+      setStatus('ready')
+    } catch (err) {
+      console.error(err)
+      if (kindRef.current === targetKind && replace) setStatus('error')
+    } finally {
+      loadingRef.current = false
+      setLoadingMore(false)
+    }
+  }, [])
 
   useEffect(() => {
     if (!GALLERY_ENABLED) {
       setStatus('unconfigured')
       return
     }
-    let cancelled = false
-    setStatus('loading')
-    fetchCreations(kind)
-      .then((rows) => {
-        if (cancelled) return
-        setCreations(rows)
-        setStatus('ready')
-      })
-      .catch((err) => {
-        console.error(err)
-        if (!cancelled) setStatus('error')
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [kind])
+    pageRef.current = 0
+    setCreations([])
+    setTotal(0)
+    load(kind, 0, true)
+  }, [kind, load])
+
+  // Infinite scroll — pull the next page as the sentinel nears the viewport.
+  // Re-observed after every append so that, if the fresh page still doesn't
+  // fill the viewport, the observer re-fires and keeps going until it does
+  // (or everything's loaded).
+  useEffect(() => {
+    if (status !== 'ready') return
+    const el = sentinelRef.current
+    if (!el) return
+    if (creations.length === 0 || creations.length >= total) return
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting || loadingRef.current) return
+        if (creationsRef.current.length >= totalRef.current) return
+        load(kindRef.current, pageRef.current + 1, false)
+      },
+      { rootMargin: '500px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [load, status, creations.length, total])
 
   const removeCreation = (id) => {
     setRemovingIds((prev) => new Set(prev).add(id))
@@ -52,6 +101,7 @@ export default function Gallery() {
       try {
         await deleteCreation(id, DEBUG_PASSPHRASE)
         setCreations((prev) => prev.filter((c) => c.id !== id))
+        setTotal((t) => Math.max(0, t - 1))
       } catch (err) {
         await alertUser(err.message || 'Could not delete.')
       } finally {
@@ -95,7 +145,16 @@ export default function Gallery() {
         {status === 'error' && (
           <p className="gallery-empty">Couldn't load the gallery — try again in a bit.</p>
         )}
-        {status === 'loading' && <p className="gallery-empty">loading…</p>}
+        {status === 'loading' && (
+          <div className="gallery-grid" aria-hidden="true">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="gallery-card gallery-card--skeleton">
+                <div className="gallery-card-thumb" />
+                <div className="gallery-skeleton-line" />
+              </div>
+            ))}
+          </div>
+        )}
         {status === 'ready' && creations.length === 0 && (
           <p className="gallery-empty">Nothing here yet — go make something.</p>
         )}
@@ -138,6 +197,27 @@ export default function Gallery() {
               </Link>
             ))}
           </div>
+        )}
+
+        <div ref={sentinelRef} className="gallery-sentinel" aria-hidden="true" />
+
+        {status === 'ready' && creations.length > 0 && creations.length < total && (
+          <div className="gallery-more">
+            {loadingMore ? (
+              <p className="gallery-empty gallery-loading-more">loading more…</p>
+            ) : (
+              <button
+                type="button"
+                className="gallery-more-btn"
+                onClick={() => load(kind, pageRef.current + 1, false)}
+              >
+                load more ({total - creations.length} left)
+              </button>
+            )}
+          </div>
+        )}
+        {status === 'ready' && total > 0 && creations.length >= total && creations.length > 8 && (
+          <p className="gallery-empty gallery-end">that's all {total} of them.</p>
         )}
       </div>
 

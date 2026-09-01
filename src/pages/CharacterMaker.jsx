@@ -1,5 +1,8 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Nav from '../components/Nav'
+import SaveToGallery from '../components/SaveToGallery'
+import { useModal } from '../components/ModalProvider'
+import { outlineBtn, presetBtn, makeActivePreset } from '../lib/controlStyles'
 import {
   VIEW_W,
   VIEW_H,
@@ -13,51 +16,48 @@ import {
   drawOrder,
   optionFor,
   randomCharacter,
+  rerollFeature,
+  rerollColor,
   shadeColor,
   exportCharacterPng,
+  characterToBlob,
+  encodeCharacter,
+  decodeCharacter,
 } from '../lib/characterUtils'
 
 const ACCENT = '#57b894'
 
-const outlineBtn = {
-  background: 'transparent',
-  color: '#8a8a8a',
-  border: '2px solid #e0dbd0',
-  borderRadius: 40,
-  padding: '11px 22px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 13,
-  cursor: 'pointer',
-}
+const activePresetBtn = makeActivePreset(ACCENT)
 
-const presetBtn = {
-  background: '#faf8f3',
-  color: '#141414',
-  border: '1px solid #e8e3d8',
-  borderRadius: 40,
-  padding: '9px 18px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 12,
-  cursor: 'pointer',
-}
-
-const activePresetBtn = {
-  ...presetBtn,
-  border: `2px solid ${ACCENT}`,
-  background: 'rgba(87, 184, 148, .12)',
+// A shared link puts the whole build in ?c=… — decode it on first load.
+function initialFromUrl() {
+  if (typeof window === 'undefined') return null
+  const token = new URLSearchParams(window.location.search).get('c')
+  return token ? decodeCharacter(token) : null
 }
 
 export default function CharacterMaker() {
-  const [character, setCharacter] = useState(DEFAULT_CHARACTER)
-  const [colors, setColors] = useState(DEFAULT_COLORS)
+  const { copyLink: copyLinkModal } = useModal()
+  const fromUrl = useMemo(initialFromUrl, [])
+
+  const [character, setCharacter] = useState(fromUrl?.character ?? DEFAULT_CHARACTER)
+  const [colors, setColors] = useState(fromUrl?.colors ?? DEFAULT_COLORS)
   const [featuresOpen, setFeaturesOpen] = useState(true)
   const [colorsOpen, setColorsOpen] = useState(false)
   const [openParts, setOpenParts] = useState(() =>
     Object.fromEntries(FEATURES.map((f) => [f.id, true]))
   )
+  const [copied, setCopied] = useState(false)
   const svgRef = useRef(null)
 
   const ordered = useMemo(() => drawOrder(), [])
+
+  // Keep the address bar in sync with the current build so a plain copy of the
+  // URL is always shareable, without stacking history entries.
+  useEffect(() => {
+    const url = `${window.location.pathname}?c=${encodeCharacter({ character, colors })}`
+    window.history.replaceState(null, '', url)
+  }, [character, colors])
 
   // '@' -> the feature's own colorKey, '@skin' -> that named key, else literal
   const resolveFill = (fill, feature) => {
@@ -69,6 +69,12 @@ export default function CharacterMaker() {
 
   const pick = (featureId, optionId) =>
     setCharacter((c) => ({ ...c, [featureId]: optionId }))
+
+  const rerollPart = (featureId) =>
+    setCharacter((c) => ({ ...c, [featureId]: rerollFeature(featureId, c[featureId]) }))
+
+  const rerollColorKey = (key) =>
+    setColors((c) => ({ ...c, [key]: rerollColor(key, c[key]) }))
 
   const togglePart = (featureId) =>
     setOpenParts((o) => ({ ...o, [featureId]: !o[featureId] }))
@@ -84,6 +90,17 @@ export default function CharacterMaker() {
   const reset = () => {
     setCharacter(DEFAULT_CHARACTER)
     setColors(DEFAULT_COLORS)
+  }
+
+  const copyShareLink = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?c=${encodeCharacter({ character, colors })}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    } catch {
+      await copyLinkModal(url)
+    }
   }
 
   return (
@@ -110,6 +127,9 @@ export default function CharacterMaker() {
           <button type="button" style={outlineBtn} onClick={reset}>
             reset ↻
           </button>
+          <button type="button" style={outlineBtn} onClick={copyShareLink}>
+            {copied ? 'link copied ✓' : 'copy link 🔗'}
+          </button>
           <button
             type="button"
             className="btn-pill dark"
@@ -118,6 +138,12 @@ export default function CharacterMaker() {
           >
             download PNG ↓
           </button>
+          <SaveToGallery
+            kind="character"
+            hasContent={() => true}
+            getData={() => ({ character, colors })}
+            getThumbnailBlob={() => characterToBlob(svgRef.current)}
+          />
         </div>
 
         <div className="character-maker-stage-row">
@@ -146,18 +172,29 @@ export default function CharacterMaker() {
                   className={`character-maker-panel${openParts[feature.id] ? ' open' : ''}`}
                   key={feature.id}
                 >
-                  <button
-                    type="button"
-                    className="character-maker-panel-toggle"
-                    aria-expanded={openParts[feature.id]}
-                    onClick={() => togglePart(feature.id)}
-                  >
-                    <span className="character-maker-panel-label">
-                      // {feature.label.toUpperCase()}
-                    </span>
-                    <span className="character-maker-panel-current">{character[feature.id]}</span>
-                    <span className="playground-panel-chevron">▾</span>
-                  </button>
+                  <div className="character-maker-panel-head">
+                    <button
+                      type="button"
+                      className="character-maker-panel-toggle"
+                      aria-expanded={openParts[feature.id]}
+                      onClick={() => togglePart(feature.id)}
+                    >
+                      <span className="character-maker-panel-label">
+                        // {feature.label.toUpperCase()}
+                      </span>
+                      <span className="character-maker-panel-current">{character[feature.id]}</span>
+                      <span className="playground-panel-chevron">▾</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="character-maker-dice"
+                      title={`Reroll ${feature.label}`}
+                      aria-label={`Reroll ${feature.label}`}
+                      onClick={() => rerollPart(feature.id)}
+                    >
+                      ⚄
+                    </button>
+                  </div>
 
                   {openParts[feature.id] && (
                     <div className="character-maker-options">
@@ -237,7 +274,18 @@ export default function CharacterMaker() {
             <div className="character-maker-sidebar-body">
               {COLOR_KEYS.map(({ key, label, swatches }) => (
                 <div className="character-maker-panel" key={key}>
-                  <div className="character-maker-panel-label">// {label.toUpperCase()}</div>
+                  <div className="character-maker-panel-head">
+                    <div className="character-maker-panel-label">// {label.toUpperCase()}</div>
+                    <button
+                      type="button"
+                      className="character-maker-dice"
+                      title={`Reroll ${label} color`}
+                      aria-label={`Reroll ${label} color`}
+                      onClick={() => rerollColorKey(key)}
+                    >
+                      ⚄
+                    </button>
+                  </div>
                   <div className="character-maker-swatches">
                     {swatches.map((color) => (
                       <button

@@ -2,20 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import Nav from '../components/Nav'
 import fortuneTeller from '../assets/fortune-teller.svg'
 import { randomFortune } from '../lib/fortuneData'
+import { outlineBtn } from '../lib/controlStyles'
 
 const ACCENT = '#9d4edd'
 const LOADING_MS = 2200
-
-const outlineBtn = {
-  background: 'transparent',
-  color: '#8a8a8a',
-  border: '2px solid #e0dbd0',
-  borderRadius: 40,
-  padding: '11px 22px',
-  fontFamily: "'Space Mono', monospace",
-  fontSize: 13,
-  cursor: 'pointer',
-}
 
 // deliberately meaningless status lines for the (pointless) loading screen
 const CONSULTING = [
@@ -117,7 +107,7 @@ export default function FortuneTeller() {
           )}
 
           {phase === 'loading' && (
-            <div className="fortune-loading">
+            <div className="fortune-loading" role="status">
               <span className="fortune-consulting" style={{ color: ACCENT }}>
                 // {consulting}
               </span>
@@ -129,7 +119,7 @@ export default function FortuneTeller() {
               <div className="fortune-question">
                 you asked: <span>{asked}</span>
               </div>
-              <p className="fortune-line">{fortune}</p>
+              <p className="fortune-line" role="status">{fortune}</p>
               <button type="button" style={outlineBtn} onClick={askAgain}>
                 ask again ↻
               </button>

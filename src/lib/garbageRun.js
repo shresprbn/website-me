@@ -40,3 +40,14 @@ export async function fetchTopScores(limit = 10) {
   if (error) throw error
   return data
 }
+
+// Where a given score would sit on the full board — "you placed #N of M".
+export async function fetchRank(score) {
+  if (!supabase || !Number.isFinite(score) || score <= 0) return null
+  const [above, total] = await Promise.all([
+    supabase.from('garbage_run_scores').select('*', { count: 'exact', head: true }).gt('score', score),
+    supabase.from('garbage_run_scores').select('*', { count: 'exact', head: true }),
+  ])
+  if (above.error || total.error) return null
+  return { rank: (above.count || 0) + 1, total: total.count || 0 }
+}

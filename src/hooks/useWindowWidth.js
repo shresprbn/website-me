@@ -9,3 +9,13 @@ export function useWindowWidth() {
   }, [])
   return w
 }
+
+export function useWindowHeight() {
+  const [h, setH] = useState(window.innerHeight)
+  useEffect(() => {
+    const handler = () => setH(window.innerHeight)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return h
+}

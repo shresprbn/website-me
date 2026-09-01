@@ -10,6 +10,16 @@ const NAME_KEY = 'pomodoro-display-name'
 // same room in two windows.
 const CLIENT_ID_KEY = 'pomodoro-client-id'
 
+// The room the visitor was last in, so /pomodoro can offer "rejoin".
+export const LAST_ROOM_KEY = 'pomodoro-last-room'
+export function rememberRoom(roomId) {
+  try {
+    localStorage.setItem(LAST_ROOM_KEY, roomId)
+  } catch {
+    // ignore
+  }
+}
+
 const AVATAR_COLORS = ['#ff6b9d', '#4ecdc4', '#f2b705', '#5b8def', '#9b6bff', '#ff8a5c']
 
 export async function createRoom({ workMinutes, breakMinutes } = {}) {
