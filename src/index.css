@@ -3561,12 +3561,38 @@ a { color: inherit; }
   color: #8a8a8a;
   margin-bottom: 12px;
 }
+.song-diary-date--center { max-width: 900px; text-align: center; }
+.song-diary-player-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 900px;
+  margin-bottom: 36px;
+}
+.song-diary-nav-btn {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e8e3d8;
+  background: #fff;
+  font-size: 20px;
+  line-height: 1;
+  color: #141414;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.song-diary-nav-btn:hover:not(:disabled) { border-color: #ff6b9d; color: #ff6b9d; }
+.song-diary-nav-btn:disabled { opacity: .3; cursor: default; }
 .song-diary-player-card {
   max-width: 460px;
+  width: 100%;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 6px 24px rgba(0,0,0,.08);
-  margin-bottom: 36px;
 }
 .song-diary-player-card iframe { display: block; border-radius: 12px; }
 .song-diary-timeline-wrap { max-width: 900px; }
@@ -3574,9 +3600,11 @@ a { color: inherit; }
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  padding: 4px 4px 12px;
+  padding: 4px 4px 8px;
   scroll-behavior: smooth;
+  scrollbar-width: none;
 }
+.song-diary-timeline::-webkit-scrollbar { display: none; }
 .song-diary-thumb {
   flex: none;
   width: 64px;
@@ -3600,6 +3628,41 @@ a { color: inherit; }
   font-family: 'Space Mono', monospace;
   font-size: 11px;
   color: #8a8a8a;
+  margin-top: 6px;
+}
+.song-diary-scrollbar { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.song-diary-scrollbar-arrow {
+  flex: none;
+  background: #fff;
+  border: 1px solid #e8e3d8;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  color: #8a8a8a;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.song-diary-scrollbar-arrow:hover { color: #ff6b9d; border-color: #ff6b9d; }
+.song-diary-scrollbar-track {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  background: #e8e3d8;
+  border-radius: 4px;
+  cursor: pointer;
+  touch-action: none;
+}
+.song-diary-scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  min-width: 24px;
+  background: #ff6b9d;
+  border-radius: 4px;
+  pointer-events: none;
 }
 .song-diary-add { margin-top: 40px; max-width: 460px; }
 .song-diary-form { margin-top: 14px; }
