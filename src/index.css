@@ -3455,9 +3455,10 @@ a { color: inherit; }
   margin-bottom: 18px;
   text-transform: uppercase;
 }
-.terminal-text { margin: 0; font-size: 15px; white-space: pre-line; }
+.terminal-text { margin: 0 0 14px; font-size: 15px; white-space: pre-line; }
+.terminal-text:last-of-type { margin-bottom: 0; }
 .terminal-hint { margin: 20px 0 0; font-size: 12px; color: #6a6a6a; }
-.terminal-choices { display: flex; flex-direction: column; gap: 6px; }
+.terminal-choices { display: flex; flex-direction: column; gap: 6px; margin-top: 18px; }
 .terminal-choice {
   text-align: left;
   background: none;
@@ -3500,15 +3501,37 @@ a { color: inherit; }
   text-transform: uppercase;
   margin-bottom: 18px;
 }
+.adventure-card-body { margin-bottom: 28px; }
 .adventure-card-text {
   font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 20px;
   line-height: 1.55;
   color: #2e2a24;
-  margin: 0 0 28px;
+  margin: 0 0 16px;
   white-space: pre-line;
 }
+.adventure-card-text:last-child { margin-bottom: 0; }
+.adventure-cursor {
+  display: inline-block;
+  width: 9px;
+  height: 20px;
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  animation: terminal-blink 1s step-end infinite;
+}
 .adventure-continue { font-family: 'Space Mono', monospace; }
+.adventure-mode-toggle { display: inline-flex; gap: 4px; background: #efeadf; border-radius: 40px; padding: 4px; margin-bottom: 22px; }
+.adventure-mode-toggle button {
+  background: none;
+  border: none;
+  border-radius: 40px;
+  padding: 8px 18px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #8a8a8a;
+  cursor: pointer;
+}
+.adventure-mode-toggle button.active { background: #141414; color: #fff; }
 .adventure-choices { display: flex; flex-direction: column; gap: 10px; }
 .adventure-choice {
   text-align: left;

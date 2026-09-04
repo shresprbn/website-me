@@ -29,6 +29,13 @@ export const PLAYGROUND_ITEMS = [
     blurb: 'Two chemicals, a few numbers, endless organic patterns.',
   },
   {
+    to: '/euphoria',
+    glyph: '⛰',
+    color: '#5b8def',
+    title: 'Euphoria',
+    blurb: 'A branching survival story. Cave, jungle, a village, six endings.',
+  },
+  {
     to: '/pixel-maker',
     glyph: '✎',
     color: '#4ecdc4',
@@ -118,19 +125,5 @@ export const PLAYGROUND_ITEMS = [
     color: '#ff6b9d',
     title: 'Pomodoro',
     blurb: 'A shared timer — share the link, everyone sees the same clock.',
-  },
-  {
-    to: '/euphoria',
-    glyph: '⛰',
-    color: '#5b8def',
-    title: 'Euphoria',
-    blurb: 'A branching survival story. Cave, jungle, a village, six endings.',
-  },
-  {
-    to: '/euphoria-terminal',
-    glyph: '▌',
-    color: '#57b894',
-    title: 'Euphoria (Terminal)',
-    blurb: 'The same story, console-style — ported straight from the original C.',
   },
 ]
