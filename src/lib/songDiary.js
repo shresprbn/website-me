@@ -1,0 +1,165 @@
+// One song per entry, browsable by date. Album art + title come from Spotify's
+// public oEmbed endpoint (no API key needed): given a track's public URL,
+// https://open.spotify.com/oembed?url=<url> returns { title, thumbnail_url }.
+//
+// To add an entry: grab the track's spotify.com/track/<id> link, fetch
+//   curl "https://open.spotify.com/oembed?url=https://open.spotify.com/track/<id>"
+// for the title + thumbnail_url, and fill in the artist by hand (oEmbed
+// doesn't return it).
+
+export const SONG_DIARY = [
+  {
+    date: '2026-08-14',
+    trackId: '51Ggv32i87ei9RYT0mkcVY',
+    title: 'Safar',
+    artist: 'Bayaan, Sherazam',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02dace28f8bd8585a21fc58088',
+  },
+  {
+    date: '2026-08-15',
+    trackId: '5u86qN3JNyTzPbJkLTj0Bi',
+    title: 'Elizabeth',
+    artist: 'Sammy Copley',
+    thumbnailUrl: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02c2c5fc762fa24d14ef29011f',
+  },
+  {
+    date: '2026-08-16',
+    trackId: '5vtS0cDRciFX60IDyQpLg7',
+    title: 'Allarey Jovan',
+    artist: 'Bipul Chettri',
+    thumbnailUrl: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02fe775959bcee00b90774cb63',
+  },
+  {
+    date: '2026-08-17',
+    trackId: '3kZC0ZmFWrEHdUCmUqlvgZ',
+    title: 'I Will Follow You into the Dark',
+    artist: 'Death Cab for Cutie',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02c985bcc18dd81da80839e5a9',
+  },
+  {
+    date: '2026-08-18',
+    trackId: '0b0S14GQ2s5dJldARPz9kN',
+    title: 'Naboleka Boli',
+    artist: 'Monika Thapa',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02a9ed8715c25dafb27381059a',
+  },
+  {
+    date: '2026-08-19',
+    trackId: '4KROoGIaPaR1pBHPnR3bwC',
+    title: 'Pink Moon',
+    artist: 'Nick Drake',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02e369195caf5d169bf5e9eafc',
+  },
+  {
+    date: '2026-08-20',
+    trackId: '3n3nY1tcsTbBT1SyWR4Kff',
+    title: 'Miffed It',
+    artist: 'Way Dynamic',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02985b46ac3d670c9892239ff5',
+  },
+  {
+    date: '2026-08-21',
+    trackId: '5F1ZmucV0uJY14y2dYKePa',
+    title: 'Sanctuary',
+    artist: 'Joji',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e0223c552a7a4fdafac02e08c34',
+  },
+  {
+    date: '2026-08-22',
+    trackId: '4g0AnG8lxiXnzYyVbo4Tnl',
+    title: 'Morni',
+    artist: 'Silk Route',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02c3969c13931e20f08c3eccbd',
+  },
+  {
+    date: '2026-08-23',
+    trackId: '0RjG5JmdOWXAR68dGlKBA5',
+    title: 'Hidden in the Sand',
+    artist: 'Tally Hall',
+    thumbnailUrl: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02b9ccb466665c2ac10dc0d628',
+  },
+  {
+    date: '2026-08-24',
+    trackId: '3gm9psvcWJs3MHhzYqCKwH',
+    title: 'Nakkashi',
+    artist: 'Jatra Collective',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e027f88e8e4837fff86fb3ae28b',
+  },
+  {
+    date: '2026-08-25',
+    trackId: '0gEyKnHvgkrkBM6fbeHdwK',
+    title: 'Linger',
+    artist: 'The Cranberries',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02f6325f361d7803ad0d908451',
+  },
+  {
+    date: '2026-08-26',
+    trackId: '6OGH7MeZDf0bWeCv5JrBcv',
+    title: 'Martha',
+    artist: 'Maria Kelly',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02557a69196d6cf2a97ce520ba',
+  },
+  {
+    date: '2026-08-27',
+    trackId: '03l0rO4IIIuGWqOujIJXOK',
+    title: 'Wandering Nomad',
+    artist: 'Cody Francis',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02d27d5d36da85b86c061890e1',
+  },
+  {
+    date: '2026-08-28',
+    trackId: '5ihS6UUlyQAfmp48eSkxuQ',
+    title: 'Landslide',
+    artist: 'Fleetwood Mac',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e024fb043195e8d07e72edc7226',
+  },
+  {
+    date: '2026-08-29',
+    trackId: '5xoUgPXbMNUmoHU0Enwtwq',
+    title: 'She Moves in Her Own Way',
+    artist: 'The Kooks',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e0263a28c5ecb7b13e9b329fe47',
+  },
+  {
+    date: '2026-08-30',
+    trackId: '476V2d6iA2tWXgQboKmTtA',
+    title: 'Father and Son',
+    artist: 'Yusuf / Cat Stevens',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02e7248738c2f7ce3b5584b15d',
+  },
+  {
+    date: '2026-08-31',
+    trackId: '6nm2s55GyPdg30m8d8klJ6',
+    title: 'Upside Down',
+    artist: 'Jack Johnson',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02d33ca2c8fa48fe584de27c65',
+  },
+  {
+    date: '2026-09-01',
+    trackId: '4iHcmWi4kGGNCEk44ZIXIc',
+    title: 'Sasto Mutu',
+    artist: 'Sajjan Raj Vaidya',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e029c6e41236e9710de4e358ff8',
+  },
+  {
+    date: '2026-09-02',
+    trackId: '1ov0rqK1SErHydjl6jSWsR',
+    title: 'Safarnama',
+    artist: 'Lucky Ali, A.R. Rahman',
+    thumbnailUrl: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e0204a7c1818e30f56f537750ee',
+  },
+  {
+    date: '2026-09-03',
+    trackId: '6JB0h4leDJ4Akabtu42Epd',
+    title: 'Tere Pyar Main',
+    artist: 'Kaavish',
+    thumbnailUrl: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02b4f2f558c56dd71894df23f8',
+  },
+  {
+    date: '2026-09-04',
+    trackId: '2RgvvnMwtP0R2OkVZmFvnV',
+    title: 'Ajab Si',
+    artist: 'KK',
+    thumbnailUrl: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02456e0af8e834546541a00efa',
+  },
+]

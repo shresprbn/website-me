@@ -126,4 +126,11 @@ export const PLAYGROUND_ITEMS = [
     title: 'Euphoria',
     blurb: 'A branching survival story. Cave, jungle, a village, six endings.',
   },
+  {
+    to: '/song-diary',
+    glyph: '♫',
+    color: '#57b894',
+    title: 'Song Diary',
+    blurb: 'One song a day — a small archive, browsable by date.',
+  },
 ]

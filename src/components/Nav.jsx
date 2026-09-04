@@ -19,9 +19,11 @@ export default function Nav() {
   const isHome = pathname === '/'
   const isGallery = pathname === '/gallery' || pathname.startsWith('/gallery/')
   const isNotes = pathname === '/notes-wall'
+  const isSongDiary = pathname === '/song-diary'
   const isPlaygroundSection =
     !isGallery &&
     !isNotes &&
+    !isSongDiary &&
     PLAYGROUND_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))
 
   const sectionHref = (hash) => (isHome ? hash : `/${hash}`)
@@ -60,6 +62,13 @@ export default function Nav() {
             style={isNotes ? { color: '#ff6b9d' } : undefined}
           >
             notes
+          </Link>
+          <Link
+            to="/song-diary"
+            className={`nav-link${isSongDiary ? ' active' : ''}`}
+            style={isSongDiary ? { color: '#ff6b9d' } : undefined}
+          >
+            song diary
           </Link>
           <a href={sectionHref('#contact')} className="nav-link yellow">say hi</a>
         </div>

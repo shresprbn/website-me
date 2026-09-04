@@ -22,6 +22,7 @@ import GameOfLife from './pages/GameOfLife'
 import ReactionDiffusion from './pages/ReactionDiffusion'
 import PowderToy from './pages/PowderToy'
 import Euphoria from './pages/Euphoria'
+import SongDiary from './pages/SongDiary'
 import ScrollToTop from './components/ScrollToTop'
 import { ModalProvider } from './components/ModalProvider'
 
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/reaction-diffusion" element={<ReactionDiffusion />} />
           <Route path="/powder-toy" element={<PowderToy />} />
           <Route path="/euphoria" element={<Euphoria />} />
+          <Route path="/song-diary" element={<SongDiary />} />
         </Routes>
       </ModalProvider>
     </BrowserRouter>
