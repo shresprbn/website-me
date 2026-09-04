@@ -112,7 +112,7 @@ export default function SongDiary() {
   const [formError, setFormError] = useState('')
   const timelineRef = useRef(null)
 
-  const load = () => {
+  const load = (selectId) => {
     if (!DIARY_READ_ENABLED) {
       setStatus('unconfigured')
       return
@@ -121,13 +121,14 @@ export default function SongDiary() {
     fetchDiaryEntries()
       .then((rows) => {
         setEntries(rows)
-        setSelected(rows.length - 1)
+        const idx = selectId ? rows.findIndex((r) => r.id === selectId) : -1
+        setSelected(idx >= 0 ? idx : Math.floor(Math.random() * rows.length))
         setStatus('ready')
       })
       .catch(() => setStatus('error'))
   }
 
-  useEffect(load, [])
+  useEffect(() => load(), [])
 
   useEffect(() => {
     if (!debugMode) setFormOpen(false)
@@ -159,12 +160,12 @@ export default function SongDiary() {
 
     setSaving(true)
     try {
-      await addDiaryEntry({ trackUrl: cleanUrl, artist: cleanArtist, date, passphrase: DEBUG_PASSPHRASE })
+      const created = await addDiaryEntry({ trackUrl: cleanUrl, artist: cleanArtist, date, passphrase: DEBUG_PASSPHRASE })
       setTrackUrl('')
       setArtist('')
       setDate(todayIso())
       setFormOpen(false)
-      load()
+      load(created.id)
     } catch (err) {
       setFormError(err.message || 'Could not save entry.')
     } finally {
