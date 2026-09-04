@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Nav from '../components/Nav'
-import { fetchDiaryEntries, addDiaryEntry, DIARY_READ_ENABLED, DIARY_WRITE_ENABLED } from '../lib/songDiaryApi'
+import {
+  fetchDiaryEntries,
+  addDiaryEntry,
+  deleteDiaryEntry,
+  DIARY_READ_ENABLED,
+  DIARY_WRITE_ENABLED,
+} from '../lib/songDiaryApi'
 import { DEBUG_PASSPHRASE, useDebugMode } from '../hooks/useDebugMode'
+import { useModal } from '../components/ModalProvider'
 
 function formatDate(iso) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, {
@@ -110,7 +117,9 @@ export default function SongDiary() {
   const [date, setDate] = useState(todayIso())
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
+  const [removingIds, setRemovingIds] = useState(() => new Set())
   const timelineRef = useRef(null)
+  const { alertUser } = useModal()
 
   const load = (selectId) => {
     if (!DIARY_READ_ENABLED) {
@@ -142,6 +151,27 @@ export default function SongDiary() {
   const current = entries[selected]
   const goPrev = () => setSelected((i) => Math.max(0, i - 1))
   const goNext = () => setSelected((i) => Math.min(entries.length - 1, i + 1))
+
+  const removeEntry = (id) => {
+    setRemovingIds((prev) => new Set(prev).add(id))
+    setTimeout(async () => {
+      try {
+        await deleteDiaryEntry(id, DEBUG_PASSPHRASE)
+        const removedIdx = entries.findIndex((e) => e.id === id)
+        const next = entries.filter((e) => e.id !== id)
+        setEntries(next)
+        setSelected((sel) => (next.length === 0 ? 0 : Math.min(removedIdx < sel ? sel - 1 : sel, next.length - 1)))
+      } catch (err) {
+        await alertUser(err.message || 'Could not delete.')
+      } finally {
+        setRemovingIds((prev) => {
+          const n = new Set(prev)
+          n.delete(id)
+          return n
+        })
+      }
+    }, 280)
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -231,10 +261,25 @@ export default function SongDiary() {
                     key={entry.id}
                     type="button"
                     data-index={i}
-                    className={`song-diary-thumb${i === selected ? ' selected' : ''}`}
+                    className={`song-diary-thumb${i === selected ? ' selected' : ''}${removingIds.has(entry.id) ? ' song-diary-thumb--removing' : ''}`}
                     onClick={() => setSelected(i)}
                     title={`${entry.title} — ${entry.artist} (${formatDate(entry.date)})`}
                   >
+                    {debugMode && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        className="gallery-card-delete song-diary-thumb-delete"
+                        title="delete entry"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          removeEntry(entry.id)
+                        }}
+                      >
+                        ×
+                      </span>
+                    )}
                     <img src={entry.thumbnailUrl} alt={entry.title} loading="lazy" />
                   </button>
                 ))}
@@ -292,7 +337,9 @@ export default function SongDiary() {
       {debugMode && (
         <div className="notes-debug-badge">
           <span>🐛 debug mode</span>
-          <span className="notes-debug-hint">add a song below · type "{DEBUG_PASSPHRASE}" again to exit</span>
+          <span className="notes-debug-hint">
+            add a song below · click × on a thumbnail to delete it · type "{DEBUG_PASSPHRASE}" again to exit
+          </span>
         </div>
       )}
 
