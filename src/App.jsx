@@ -21,6 +21,8 @@ import PomodoroTimer from './pages/PomodoroTimer'
 import GameOfLife from './pages/GameOfLife'
 import ReactionDiffusion from './pages/ReactionDiffusion'
 import PowderToy from './pages/PowderToy'
+import EuphoriaStory from './pages/EuphoriaStory'
+import EuphoriaTerminal from './pages/EuphoriaTerminal'
 import ScrollToTop from './components/ScrollToTop'
 import { ModalProvider } from './components/ModalProvider'
 
@@ -52,6 +54,8 @@ export default function App() {
           <Route path="/game-of-life" element={<GameOfLife />} />
           <Route path="/reaction-diffusion" element={<ReactionDiffusion />} />
           <Route path="/powder-toy" element={<PowderToy />} />
+          <Route path="/euphoria" element={<EuphoriaStory />} />
+          <Route path="/euphoria-terminal" element={<EuphoriaTerminal />} />
         </Routes>
       </ModalProvider>
     </BrowserRouter>
