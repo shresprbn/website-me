@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Nav from '../components/Nav'
-import SaveToGallery from '../components/SaveToGallery'
 import { outlineBtn, presetBtn, makeActivePreset } from '../lib/controlStyles'
 import {
   RD_PRESETS,
@@ -12,7 +11,6 @@ import {
   stepField,
   renderField,
   exportUpscaledPng,
-  canvasToBlob,
 } from '../lib/reactionDiffusion'
 
 const ACCENT = '#7c6cf0'
@@ -187,12 +185,6 @@ export default function ReactionDiffusion() {
           >
             download PNG ↓
           </button>
-          <SaveToGallery
-            kind="reaction"
-            hasContent={() => true}
-            getData={() => ({ feed, kill, palette: paletteId })}
-            getThumbnailBlob={() => canvasToBlob(canvasRef.current, 3)}
-          />
 
           <div className="rd-seg">
             {RD_PALETTES.map((p) => (

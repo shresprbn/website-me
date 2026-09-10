@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Nav from '../components/Nav'
 import BeatViewer from '../components/BeatViewer'
+import TextMelodyPlayer from '../components/TextMelodyPlayer'
 import { supabase } from '../lib/supabase'
 import { fetchComments, postComment, COMMENTS_ENABLED } from '../lib/comments'
 
@@ -145,6 +146,18 @@ export default function CreationDetail() {
                   melodyPages={creation.data?.melodyPages || []}
                   drumsVolume={creation.data?.drumsVolume}
                   melodyVolume={creation.data?.melodyVolume}
+                />
+              </div>
+            ) : creation.kind === 'text' ? (
+              <div className="creation-detail-text">
+                <p className="creation-detail-text-body">{creation.data?.text}</p>
+                <div className="creation-detail-text-meta">
+                  {creation.data?.scaleId || 'ionian'} · {creation.data?.bpm || 120} bpm
+                </div>
+                <TextMelodyPlayer
+                  text={creation.data?.text || ''}
+                  scaleId={creation.data?.scaleId || 'ionian'}
+                  bpm={creation.data?.bpm || 120}
                 />
               </div>
             ) : (

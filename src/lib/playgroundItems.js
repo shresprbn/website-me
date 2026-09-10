@@ -133,4 +133,11 @@ export const PLAYGROUND_ITEMS = [
     title: 'Song Diary',
     blurb: 'One song a day — a small archive, browsable by date.',
   },
+  {
+    to: '/text-melody',
+    glyph: '♬',
+    color: '#e07a5f',
+    title: 'Text Melody',
+    blurb: 'Type a sentence, pick a scale, hear how the letters sound.',
+  },
 ]

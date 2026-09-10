@@ -2,7 +2,7 @@ create extension if not exists "pgcrypto";
 
 create table if not exists creations (
   id uuid primary key default gen_random_uuid(),
-  kind text not null check (kind in ('pixel', 'beat', 'character')),
+  kind text not null check (kind in ('pixel', 'beat', 'character', 'text')),
   title text,
   data jsonb not null,
   thumbnail_url text,
@@ -22,7 +22,7 @@ drop policy if exists "anyone can insert" on creations;
 create policy "anyone can insert" on creations
   for insert with check (
     length(data::text) < 20000
-    and kind in ('pixel', 'beat', 'character')
+    and kind in ('pixel', 'beat', 'character', 'text')
   );
 
 insert into storage.buckets (id, name, public)

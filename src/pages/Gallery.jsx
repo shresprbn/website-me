@@ -10,7 +10,7 @@ const KINDS = [
   { id: 'pixel', label: 'pixel maker' },
   { id: 'beat', label: 'beat maker' },
   { id: 'character', label: 'character maker' },
-  { id: 'reaction', label: 'reaction–diffusion' },
+  { id: 'text', label: 'text melody' },
 ]
 
 function formatDate(iso) {

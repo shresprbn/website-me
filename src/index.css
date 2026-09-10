@@ -3673,3 +3673,125 @@ a { color: inherit; }
 @media (max-width: 640px) {
   .song-diary-thumb { width: 52px; height: 52px; }
 }
+
+/* ── Text melody ─────────────────────────────────────────── */
+.text-melody-page { padding: 64px 32px 100px; }
+.text-melody-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+.text-melody-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+.text-melody-field--bpm { flex-direction: row; align-items: center; gap: 10px; }
+.text-melody-field--bpm input[type='range'] { width: 160px; }
+.text-melody-bpm-val {
+  font-size: 13px;
+  color: #141414;
+  min-width: 34px;
+  text-transform: none;
+}
+.text-melody-select {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  border: 1px solid #e0dbd0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: #fff;
+  color: #141414;
+  cursor: pointer;
+}
+.text-melody-input {
+  width: 100%;
+  max-width: 760px;
+  font-family: 'Space Mono', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  border: 1px solid #e0dbd0;
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: #fff;
+  color: #141414;
+  resize: vertical;
+}
+.text-melody-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #b8b2a4;
+  margin: 6px 0 28px;
+}
+.text-melody-roll {
+  max-width: 900px;
+  height: 150px;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #e8e3d8;
+  border-radius: 10px;
+}
+.text-melody-roll-inner { position: relative; height: 100%; }
+.text-melody-bar {
+  position: absolute;
+  width: 18px;
+  height: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(0, 0, 0, .55);
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.text-melody-bar.current {
+  transform: scale(1.35);
+  box-shadow: 0 0 0 2px #141414;
+  z-index: 2;
+  color: #141414;
+}
+.text-melody-rest {
+  position: absolute;
+  bottom: 0;
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: #e8e3d8;
+}
+.text-melody-rest.current { background: #141414; }
+
+@media (max-width: 640px) {
+  .text-melody-controls { gap: 14px; }
+  .text-melody-field--bpm input[type='range'] { width: 120px; }
+}
+
+.text-melody-player { margin-top: 4px; }
+.text-melody-play { margin-bottom: 14px; }
+.text-melody-save { margin-top: 24px; }
+.creation-detail-text { max-width: 760px; margin-bottom: 40px; }
+.creation-detail-text-body {
+  font-family: 'Space Mono', monospace;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #2e2a24;
+  background: #fff;
+  border: 1px solid #e8e3d8;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+}
+.creation-detail-text-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: #8a8a8a;
+  margin-bottom: 18px;
+}
