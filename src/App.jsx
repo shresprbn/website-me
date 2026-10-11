@@ -24,6 +24,7 @@ import PowderToy from './pages/PowderToy'
 import Euphoria from './pages/Euphoria'
 import SongDiary from './pages/SongDiary'
 import TextMelody from './pages/TextMelody'
+import MindMap from './pages/MindMap'
 import ScrollToTop from './components/ScrollToTop'
 import { ModalProvider } from './components/ModalProvider'
 
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/euphoria" element={<Euphoria />} />
           <Route path="/song-diary" element={<SongDiary />} />
           <Route path="/text-melody" element={<TextMelody />} />
+          <Route path="/mind-map" element={<MindMap />} />
         </Routes>
       </ModalProvider>
     </BrowserRouter>

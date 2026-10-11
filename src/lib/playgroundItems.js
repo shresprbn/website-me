@@ -140,4 +140,11 @@ export const PLAYGROUND_ITEMS = [
     title: 'Text Melody',
     blurb: 'Type a sentence, pick a scale, hear how the letters sound.',
   },
+  {
+    to: '/mind-map',
+    glyph: '❖',
+    color: '#7c6cf0',
+    title: 'Mind Map',
+    blurb: 'Branch ideas off each other — export to a file, import it back.',
+  },
 ]
